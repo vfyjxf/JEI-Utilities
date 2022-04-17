@@ -199,9 +199,9 @@ public class AdvancedIngredientGrid extends IngredientGrid {
         return guiHistoryIngredientSlots;
     }
 
-    public void addHistoryIngredient(IClickedIngredient<?> clicked) {
-        if (clicked != null) {
-            Object normalized = normalize(clicked.getValue());
+    public void addHistoryIngredient(Object value) {
+        if (value != null) {
+            Object normalized = normalize(value);
             IIngredientListElement<?> ingredient = IngredientListElement.create(
                     normalized,
                     ingredientRegistry.getIngredientHelper(normalized),

@@ -31,6 +31,8 @@ minecraft {
     
 	replace '@VERSION@', project.version
 	// makeObfSourceJar = false
+    clientJvmArgs += "-Dfml.coreMods.load=com.github.vfyjxf.jeiutilities.asm.JeiUtilitiesLoadingPlugin"
+    serverJvmArgs += "-Dfml.coreMods.load=com.github.vfyjxf.jeiutilities.asm.JeiUtilitiesLoadingPlugin"
 }
 
 processResources {
@@ -81,6 +83,14 @@ task devJar(type: Jar) {
 task sourcesJar(type: Jar) {
 	classifier = 'sources'
 	from sourceSets.main.allSource
+}
+
+jar {
+    appendix project.minecraft.version
+    manifest.attributes(
+            'FMLCorePlugin': 'com.github.vfyjxf.jeiutilities.asm.JeiUtilitiesLoadingPlugin',
+            'FMLCorePluginContainsFMLMod': 'true'
+    )
 }
 
 artifacts {
