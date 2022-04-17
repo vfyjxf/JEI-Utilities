@@ -114,6 +114,8 @@ public class BookmarkInputHandler {
             if (recipeInfo != null) {
                 IFocus.Mode mode = recipeInfo.isInputMode() ? IFocus.Mode.INPUT : IFocus.Mode.OUTPUT;
                 recipesGui.show(new Focus<Object>(mode, recipeInfo.getIngredient()));
+                JeiUtilitiesPlugin.getGrid().removeElement(0);
+                JeiUtilitiesPlugin.getGrid().addHistoryIngredient(recipeInfo.getResult());
                 IngredientLookupState state = getState();
                 if (state != null) {
                     state.setRecipeCategoryIndex(recipeInfo.getRecipeCategoryIndex());
@@ -142,6 +144,8 @@ public class BookmarkInputHandler {
                 if (recipeInfo != null) {
                     IFocus.Mode mode = recipeInfo.isInputMode() ? IFocus.Mode.INPUT : IFocus.Mode.OUTPUT;
                     recipesGui.show(new Focus<Object>(mode, recipeInfo.getIngredient()));
+                    JeiUtilitiesPlugin.getGrid().removeElement(0);
+                    JeiUtilitiesPlugin.getGrid().addHistoryIngredient(recipeInfo.getResult());
                     IngredientLookupState state = getState();
                     if (state != null) {
                         state.setRecipeCategoryIndex(recipeInfo.getRecipeCategoryIndex());

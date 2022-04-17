@@ -222,6 +222,11 @@ public class AdvancedIngredientGrid extends IngredientGrid {
 
     }
 
+    public void removeElement(int index){
+    	historyIngredientElements.remove(index);
+    	guiHistoryIngredientSlots.set(0, historyIngredientElements);
+    }
+
     private <T> T normalize(T ingredient) {
         IIngredientHelper<T> ingredientHelper = ingredientRegistry.getIngredientHelper(ingredient);
         T copy = LegacyUtil.getIngredientCopy(ingredient, ingredientHelper);
