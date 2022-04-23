@@ -1,6 +1,6 @@
 jeiutilities.tooltip.recording=配方记录设置
-jeiutilities.tooltip.recording.mode=当前模式 ： %s
-jeiutilities.tooltip.recording.mode.description=关于不同配置的描述见配置文件
+jeiutilities.tooltip.recording.mode=当前模式：%s
+jeiutilities.tooltip.recording.description.restricted=按住Shift键时打开记录的配方。
 
 jeiutilities.button.name.disable=关闭配方记录
 jeiutilities.button.name.enable=打开配方记录

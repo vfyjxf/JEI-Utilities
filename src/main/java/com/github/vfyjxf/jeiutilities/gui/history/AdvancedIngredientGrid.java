@@ -228,7 +228,7 @@ public class AdvancedIngredientGrid extends IngredientGrid {
                     ForgeModIdHelper.getInstance(),
                     ORDER_TRACKER.getOrderIndex(normalized, ingredientRegistry.getIngredientHelper(normalized))
             );
-            historyIngredientElements.removeIf(element -> areIngredientEqual(element.getIngredient(), normalized));
+            historyIngredientElements.removeIf(element -> areIngredientEqual(element.getIngredient(), normalized, JeiUtilitiesConfig.isMatchesNBTs()));
             historyIngredientElements.add(0, ingredient);
             if (historyIngredientElements.size() > this.historySize) {
                 historyIngredientElements.remove(historyIngredientElements.size() - 1);
@@ -257,7 +257,7 @@ public class AdvancedIngredientGrid extends IngredientGrid {
         return copy;
     }
 
-    private boolean areIngredientEqual(@Nonnull Object ingredient1, @Nonnull Object ingredient2) {
+    private boolean areIngredientEqual(@Nonnull Object ingredient1, @Nonnull Object ingredient2, boolean matchesNbt) {
 
         if (ingredient1 == ingredient2) {
             return true;
@@ -265,13 +265,17 @@ public class AdvancedIngredientGrid extends IngredientGrid {
 
         if (ingredient1.getClass() == ingredient2.getClass()) {
             IIngredientHelper<Object> ingredientHelper = ingredientRegistry.getIngredientHelper(ingredient1);
-            return ingredientHelper.getUniqueId(ingredient1).equals(ingredientHelper.getUniqueId(ingredient2));
+            if (matchesNbt) {
+                return ingredientHelper.getUniqueId(ingredient1).equals(ingredientHelper.getUniqueId(ingredient2));
+            }
+            return ingredientHelper.getWildcardId(ingredient1).equals(ingredientHelper.getWildcardId(ingredient2));
         }
 
         return false;
     }
 
     //TODO:implements it
+
     /**
      * An ingredient such as energy ingredient in ender:io and Multiblocked.
      * It should not be added to the browsing history because it is meaningless in itself

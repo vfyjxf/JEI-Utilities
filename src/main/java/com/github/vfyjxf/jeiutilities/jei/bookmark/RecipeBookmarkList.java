@@ -162,7 +162,7 @@ public class RecipeBookmarkList {
 
         String ingredient = jsonObject.get("ingredient").getAsString();
         String result = jsonObject.get("result").getAsString();
-        int recipeCategoryIndex = Integer.parseInt(jsonObject.get("recipeCategoryIndex").getAsString());
+        String recipeCategoryUid = jsonObject.get("recipeCategoryUid").getAsString();
         int recipeIndex = Integer.parseInt(jsonObject.get("recipeIndex").getAsString());
         boolean isInputMode = Boolean.parseBoolean(jsonObject.get("isInputMode").getAsString());
 
@@ -172,7 +172,7 @@ public class RecipeBookmarkList {
             JEIUtilities.logger.error("Failed to load recipe info from json string:\n{}", recipeInfoString);
             return null;
         }
-        return new RecipeInfo<>(ingredientObject, resultObject, recipeCategoryIndex, recipeIndex, isInputMode);
+        return new RecipeInfo<>(ingredientObject, resultObject, recipeCategoryUid, recipeIndex, isInputMode);
     }
 
     @Nullable
@@ -191,14 +191,14 @@ public class RecipeBookmarkList {
 
         private final V ingredient;
         private final T result;
-        private final int recipeCategoryIndex;
+        private final String recipeCategoryUid;
         private final int recipeIndex;
         private final boolean isInputMode;
 
-        public RecipeInfo(V outputIngredient, T result, int recipeCategoryIndex, int recipeIndex, boolean isInputMode) {
+        public RecipeInfo(V outputIngredient, T result, String recipeCategoryUid, int recipeIndex, boolean isInputMode) {
             this.ingredient = outputIngredient;
             this.result = result;
-            this.recipeCategoryIndex = recipeCategoryIndex;
+            this.recipeCategoryUid = recipeCategoryUid;
             this.recipeIndex = recipeIndex;
             this.isInputMode = isInputMode;
         }
@@ -211,8 +211,8 @@ public class RecipeBookmarkList {
             return result;
         }
 
-        public int getRecipeCategoryIndex() {
-            return recipeCategoryIndex;
+        public String getRecipeCategoryUid() {
+            return recipeCategoryUid;
         }
 
         public int getRecipeIndex() {
@@ -227,7 +227,7 @@ public class RecipeBookmarkList {
             if (this.result.getClass() == otherInfo.result.getClass()) {
                 IIngredientHelper<Object> ingredientHelper = JeiUtilitiesPlugin.ingredientRegistry.getIngredientHelper(result);
                 if (ingredientHelper.getUniqueId(this.result).equals(ingredientHelper.getUniqueId(otherInfo.result))) {
-                    return this.recipeCategoryIndex == otherInfo.recipeCategoryIndex && this.recipeIndex == otherInfo.recipeIndex;
+                    return this.recipeCategoryUid.equals(otherInfo.recipeCategoryUid) && this.recipeIndex == otherInfo.recipeIndex;
                 }
             }
 
@@ -247,7 +247,7 @@ public class RecipeBookmarkList {
             return "{" +
                     "\"ingredient\":\"" + getIngredientString(ingredient) + "\"," +
                     "\"result\":\"" + getIngredientString(result) + "\"," +
-                    "\"recipeCategoryIndex\":" + recipeCategoryIndex + "," +
+                    "\"recipeCategoryUid\":\"" + recipeCategoryUid + "\"," +
                     "\"recipeIndex\":" + recipeIndex + "," +
                     "\"isInputMode\":" + isInputMode +
                     "}";
@@ -260,7 +260,7 @@ public class RecipeBookmarkList {
                 return MARKER_STACK + ((ItemStack) ingredient).writeToNBT(new NBTTagCompound()).toString().replace("\"", "\\\"");
             } else {
                 IIngredientHelper<I> ingredientHelper = JeiUtilitiesPlugin.ingredientRegistry.getIngredientHelper(ingredient);
-                return ingredientHelper.getUniqueId(ingredient);
+                return MARKER_OTHER + ingredientHelper.getUniqueId(ingredient);
             }
         }
 

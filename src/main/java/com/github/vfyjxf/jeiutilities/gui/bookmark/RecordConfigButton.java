@@ -39,7 +39,9 @@ public class RecordConfigButton extends GuiIconToggleButton {
     public void getTooltips(@Nonnull List<String> tooltip) {
         tooltip.add(Translator.translateToLocal("jeiutilities.tooltip.recording"));
         tooltip.add(TextFormatting.GRAY + Translator.translateToLocalFormatted("jeiutilities.tooltip.recording.mode", this.currentMode.getLocalizedName()));
-        tooltip.add(TextFormatting.GRAY + Translator.translateToLocal("jeiutilities.tooltip.recording.mode.description"));
+        if (currentMode == RecordMode.RESTRICTED){
+            tooltip.add(TextFormatting.GRAY + Translator.translateToLocal("jeiutilities.tooltip.recording.description.restricted"));
+        }
     }
 
     @Override

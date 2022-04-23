@@ -8,19 +8,19 @@ import java.io.File;
 
 public class JeiUtilitiesConfig {
 
-    private static final String CATEGORY_GENERAL = "general";
+    private static final String CATEGORY_HISTORY = "history";
+    private static final String CATEGORY_BOOKMARK = "bookmark";
 
     private static Configuration config;
     private static File modConfigFile;
     private static File bookmarkRecipeInfoFile;
 
     private static boolean enableHistory = true;
+    private static boolean matchesNBTs = true;
+    private static int backgroundColour = 0xee555555;
 
     private static boolean recordRecipes = true;
-
     private static RecordMode recordMode = RecordMode.ENABLE;
-
-    private static int backgroundColour = 0xee555555;
 
 
     public static void preInit(FMLPreInitializationEvent event) {
@@ -42,15 +42,21 @@ public class JeiUtilitiesConfig {
 
         config.load();
 
-        enableHistory = config.getBoolean("enableHistory", CATEGORY_GENERAL, enableHistory, "Enable browsing history function");
-        recordRecipes = config.getBoolean("recordRecipes", CATEGORY_GENERAL, recordRecipes, "Record current recipe when add ingredient to bookmark in recipe screen");
-        recordMode = RecordMode.valueOf(config.getString(
-                "recordMode", CATEGORY_GENERAL, recordMode.name(),
-                "Current mode of recording recipes." + "\n"
-                        + "Enable: The opposite of RESTRICTED mode" + "\n"
-                        + "Disable: Don't record any recipes" + "\n"
-                        + "RESTRICTED: Marking a bookmark while holding down the shift key will record the recipe, and viewing the recipe while holding down the shift key will display the marked recipe"));
-        backgroundColour = config.getInt("backgroundColour", CATEGORY_GENERAL, backgroundColour, Integer.MIN_VALUE, Integer.MAX_VALUE, "Color of the history area display");
+        {
+            enableHistory = config.getBoolean("enableHistory", CATEGORY_HISTORY, enableHistory, "Enable browsing history function");
+            matchesNBTs = config.getBoolean("matchesNBTs", CATEGORY_HISTORY, matchesNBTs, "Add item with different nbt to the browsing history");
+            backgroundColour = config.getInt("backgroundColour", CATEGORY_HISTORY, backgroundColour, Integer.MIN_VALUE, Integer.MAX_VALUE, "Color of the history area display");
+        }
+        {
+            recordRecipes = config.getBoolean("recordRecipes", CATEGORY_BOOKMARK, recordRecipes, "Record current recipe when add ingredient to bookmark in recipe screen");
+            recordMode = RecordMode.valueOf(config.getString(
+                    "recordMode", CATEGORY_BOOKMARK, recordMode.name(),
+                    "Current mode of recording recipes." + "\n"
+                            + "Enable: The opposite of RESTRICTED mode" + "\n"
+                            + "Disable: Don't record any recipes" + "\n"
+                            + "RESTRICTED: You need to hold down Shift to view the marked recipe."));
+        }
+
 
         if (config.hasChanged()) {
             config.save();
@@ -73,6 +79,10 @@ public class JeiUtilitiesConfig {
         return enableHistory;
     }
 
+    public static boolean isMatchesNBTs() {
+        return matchesNBTs;
+    }
+
     public static boolean getRecordRecipes() {
         return recordRecipes;
     }
@@ -87,7 +97,7 @@ public class JeiUtilitiesConfig {
 
     public static void setRecordMode(RecordMode mode) {
         JeiUtilitiesConfig.recordMode = mode;
-        config.get(CATEGORY_GENERAL, "recordMode", recordMode.name(), "Current mode of recording recipes").set(mode.name());
+        config.get(CATEGORY_BOOKMARK, "recordMode", recordMode.name(), "Current mode of recording recipes").set(mode.name());
         config.save();
     }
 
