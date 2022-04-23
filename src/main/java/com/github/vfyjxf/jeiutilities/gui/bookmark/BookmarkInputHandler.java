@@ -1,8 +1,10 @@
-package com.github.vfyjxf.jeiutilities.gui;
+package com.github.vfyjxf.jeiutilities.gui.bookmark;
 
-import com.github.vfyjxf.jeiutilities.gui.RecipeBookmarkList.RecipeInfo;
+import com.github.vfyjxf.jeiutilities.config.JeiUtilitiesConfig;
+import com.github.vfyjxf.jeiutilities.config.RecordMode;
 import com.github.vfyjxf.jeiutilities.jei.JeiUtilitiesPlugin;
-import mezz.jei.api.ingredients.IIngredientHelper;
+import com.github.vfyjxf.jeiutilities.jei.bookmark.RecipeBookmarkList;
+import com.github.vfyjxf.jeiutilities.jei.bookmark.RecipeBookmarkList.RecipeInfo;
 import mezz.jei.api.recipe.IFocus;
 import mezz.jei.bookmarks.BookmarkList;
 import mezz.jei.config.KeyBindings;
@@ -17,10 +19,8 @@ import mezz.jei.gui.recipes.RecipesGui;
 import mezz.jei.input.IClickedIngredient;
 import mezz.jei.input.InputHandler;
 import mezz.jei.input.MouseHelper;
-import mezz.jei.util.LegacyUtil;
-import net.minecraft.item.ItemStack;
+import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraftforge.client.event.GuiScreenEvent;
-import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -60,7 +60,9 @@ public class BookmarkInputHandler {
     public void onBookmarkRemove(GuiScreenEvent.KeyboardInputEvent event) {
         if (ingredientUnderMouse == null) {
             int eventKey = Keyboard.getEventKey();
-            if (KeyBindings.bookmark.isActiveAndMatches(eventKey)) {
+            boolean withShift = JeiUtilitiesConfig.getRecordMode() == RecordMode.RESTRICTED;
+
+            if (isBookmark(eventKey, withShift)) {
                 IClickedIngredient<?> clicked = getIngredientUnderMouseForKey();
                 if (clicked != null) {
                     ingredientUnderMouse = clicked.getValue();
@@ -71,20 +73,30 @@ public class BookmarkInputHandler {
 
     @SubscribeEvent(priority = EventPriority.LOW, receiveCanceled = true)
     public void onBookmarkListAddOrRemove(GuiScreenEvent.KeyboardInputEvent event) {
-        if (event.isCanceled()) {
+        boolean withShift = JeiUtilitiesConfig.getRecordMode() == RecordMode.RESTRICTED;
+        if (event.isCanceled() || withShift) {
+
+            if (JeiUtilitiesConfig.getRecordMode() == RecordMode.DISABLE) {
+                return;
+            }
+
             final int eventKey = Keyboard.getEventKey();
 
-            if (KeyBindings.bookmark.isActiveAndMatches(eventKey)) {
+            if (isBookmark(eventKey, withShift)) {
+
                 Object ingredient = getOutputUnderMouse();
                 //If the bookmark contains this ingredient, the current recipe is recorded
                 if (ingredient != null) {
+                    if (withShift) {
+                        bookmarkList.add(ingredient);
+                    }
                     if (isBookmarkContains(ingredient)) {
                         IngredientLookupState state = getState();
                         if (state != null && state.getFocus() != null) {
                             boolean isInputMode = state.getFocus().getMode() == IFocus.Mode.INPUT;
                             RecipeInfo<?, ?> recipeInfo = new RecipeInfo<>(
-                                    normalize(state.getFocus().getValue()),
-                                    normalize(ingredient),
+                                    RecipeBookmarkList.normalize(state.getFocus().getValue()),
+                                    RecipeBookmarkList.normalize(ingredient),
                                     state.getRecipeCategoryIndex(),
                                     state.getRecipeIndex(),
                                     isInputMode
@@ -106,6 +118,15 @@ public class BookmarkInputHandler {
      */
     @SubscribeEvent(priority = EventPriority.HIGH)
     public void onMouseClicked(GuiScreenEvent.MouseInputEvent event) {
+
+        if (JeiUtilitiesConfig.getRecordMode() == RecordMode.DISABLE) {
+            return;
+        }
+
+        if (JeiUtilitiesConfig.getRecordMode() == RecordMode.RESTRICTED && !GuiContainer.isShiftKeyDown()) {
+            return;
+        }
+
         IClickedIngredient<?> clicked = leftAreaDispatcher.getIngredientUnderMouse(MouseHelper.getX(), MouseHelper.getY());
         final int eventButton = Mouse.getEventButton();
 
@@ -134,9 +155,20 @@ public class BookmarkInputHandler {
      */
     @SubscribeEvent(priority = EventPriority.HIGH)
     public void onKeyPressed(GuiScreenEvent.KeyboardInputEvent event) {
-        int eventKey = Keyboard.getEventKey();
 
-        if (KeyBindings.showRecipe.isActiveAndMatches(eventKey)) {
+        if (JeiUtilitiesConfig.getRecordMode() == RecordMode.DISABLE) {
+            return;
+        }
+
+        int eventKey = Keyboard.getEventKey();
+        boolean withShift = JeiUtilitiesConfig.getRecordMode() == RecordMode.RESTRICTED;
+
+        if (isShowRecipe(eventKey, withShift)) {
+
+            if (JeiUtilitiesConfig.getRecordMode() == RecordMode.RESTRICTED && !GuiContainer.isShiftKeyDown()) {
+                return;
+            }
+
             IClickedIngredient<?> clicked = getIngredientUnderMouseForKey();
             if (clicked != null) {
 
@@ -157,17 +189,6 @@ public class BookmarkInputHandler {
                 }
             }
         }
-    }
-
-    private <T> T normalize(T ingredient) {
-        IIngredientHelper<T> ingredientHelper = JeiUtilitiesPlugin.ingredientRegistry.getIngredientHelper(ingredient);
-        T copy = LegacyUtil.getIngredientCopy(ingredient, ingredientHelper);
-        if (copy instanceof ItemStack) {
-            ((ItemStack) copy).setCount(1);
-        } else if (copy instanceof FluidStack) {
-            ((FluidStack) copy).amount = 1000;
-        }
-        return copy;
     }
 
     @SuppressWarnings("unchecked")
@@ -224,6 +245,22 @@ public class BookmarkInputHandler {
         }
     }
 
+    private boolean isShowRecipe(int keycode, boolean withShift) {
+        if (withShift) {
+            return keycode != 0 && KeyBindings.showRecipe.getKeyCode() == keycode && KeyBindings.showRecipe.getKeyConflictContext().isActive() && GuiContainer.isShiftKeyDown();
+        } else {
+            return KeyBindings.showRecipe.isActiveAndMatches(keycode);
+        }
+    }
+
+    private boolean isBookmark(int keycode, boolean withShift) {
+        if (withShift) {
+            return keycode != 0 && KeyBindings.bookmark.getKeyCode() == keycode && KeyBindings.bookmark.getKeyConflictContext().isActive() && GuiContainer.isShiftKeyDown();
+        } else {
+            return KeyBindings.bookmark.isActiveAndMatches(keycode);
+        }
+    }
+
     public static void onInputHandlerSet() {
         recipesGui = JeiUtilitiesPlugin.jeiRuntime.getRecipesGui();
         logic = ObfuscationReflectionHelper.getPrivateValue(RecipesGui.class, recipesGui, "logic");
@@ -234,6 +271,10 @@ public class BookmarkInputHandler {
         containsMethod = ObfuscationReflectionHelper.findMethod(BookmarkList.class, "contains", boolean.class, Object.class);
         getIngredientUnderMouseForKeyMethod = ObfuscationReflectionHelper.findMethod(InputHandler.class, "getIngredientUnderMouseForKey", IClickedIngredient.class, int.class, int.class);
         updateRecipesMethod = ObfuscationReflectionHelper.findMethod(RecipeGuiLogic.class, "updateRecipes", void.class);
+    }
+
+    public static void setBookmarkOverlay(){
+
     }
 
     public RecipeBookmarkList getRecipeBookmarkList() {

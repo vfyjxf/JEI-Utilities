@@ -13,7 +13,7 @@ public final class JeiHooks {
      *Since using events to implement add history requires too much processing, we decided to use asm.
      */
     public static <V> void onSetFocus(IFocus<V> focus){
-        if (JeiUtilitiesConfig.enableHistory) {
+        if (JeiUtilitiesConfig.getEnableHistory()) {
             JeiUtilitiesPlugin.getGrid().addHistoryIngredient(focus.getValue());
         }
     }

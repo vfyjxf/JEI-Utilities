@@ -1,0 +1,7 @@
+jeiutilities.tooltip.recording=Recipe Record Configuration
+jeiutilities.tooltip.recording.mode=Current Mode : %s
+jeiutilities.tooltip.recording.mode.description=See the configuration file for a description of the different modes.
+
+jeiutilities.button.name.disable=Disable
+jeiutilities.button.name.enable=Enable
+jeiutilities.button.name.restricted=Restricted

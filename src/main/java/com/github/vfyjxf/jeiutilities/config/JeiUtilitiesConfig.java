@@ -14,11 +14,13 @@ public class JeiUtilitiesConfig {
     private static File modConfigFile;
     private static File bookmarkRecipeInfoFile;
 
-    public static boolean enableHistory = true;
+    private static boolean enableHistory = true;
 
-    public static boolean recordRecipes = true;
+    private static boolean recordRecipes = true;
 
-    public static int backgroundColour = 0xee555555;
+    private static RecordMode recordMode = RecordMode.ENABLE;
+
+    private static int backgroundColour = 0xee555555;
 
 
     public static void preInit(FMLPreInitializationEvent event) {
@@ -42,9 +44,15 @@ public class JeiUtilitiesConfig {
 
         enableHistory = config.getBoolean("enableHistory", CATEGORY_GENERAL, enableHistory, "Enable browsing history function");
         recordRecipes = config.getBoolean("recordRecipes", CATEGORY_GENERAL, recordRecipes, "Record current recipe when add ingredient to bookmark in recipe screen");
+        recordMode = RecordMode.valueOf(config.getString(
+                "recordMode", CATEGORY_GENERAL, recordMode.name(),
+                "Current mode of recording recipes." + "\n"
+                        + "Enable: The opposite of RESTRICTED mode" + "\n"
+                        + "Disable: Don't record any recipes" + "\n"
+                        + "RESTRICTED: Marking a bookmark while holding down the shift key will record the recipe, and viewing the recipe while holding down the shift key will display the marked recipe"));
         backgroundColour = config.getInt("backgroundColour", CATEGORY_GENERAL, backgroundColour, Integer.MIN_VALUE, Integer.MAX_VALUE, "Color of the history area display");
 
-        if (config.hasChanged()){
+        if (config.hasChanged()) {
             config.save();
         }
     }
@@ -59,6 +67,28 @@ public class JeiUtilitiesConfig {
 
     public static File getBookmarkRecipeInfoFile() {
         return bookmarkRecipeInfoFile;
+    }
+
+    public static boolean getEnableHistory() {
+        return enableHistory;
+    }
+
+    public static boolean getRecordRecipes() {
+        return recordRecipes;
+    }
+
+    public static RecordMode getRecordMode() {
+        return recordMode;
+    }
+
+    public static int getBackgroundColour() {
+        return backgroundColour;
+    }
+
+    public static void setRecordMode(RecordMode mode) {
+        JeiUtilitiesConfig.recordMode = mode;
+        config.get(CATEGORY_GENERAL, "recordMode", recordMode.name(), "Current mode of recording recipes").set(mode.name());
+        config.save();
     }
 
 }

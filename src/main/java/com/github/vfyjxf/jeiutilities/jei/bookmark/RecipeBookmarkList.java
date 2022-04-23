@@ -1,4 +1,4 @@
-package com.github.vfyjxf.jeiutilities.gui;
+package com.github.vfyjxf.jeiutilities.jei.bookmark;
 
 import com.github.vfyjxf.jeiutilities.JEIUtilities;
 import com.github.vfyjxf.jeiutilities.config.JeiUtilitiesConfig;
@@ -64,7 +64,7 @@ public class RecipeBookmarkList {
         return null;
     }
 
-    private static <T> T normalize(T ingredient) {
+    public static <T> T normalize(T ingredient) {
         IIngredientHelper<T> ingredientHelper = JeiUtilitiesPlugin.ingredientRegistry.getIngredientHelper(ingredient);
         T copy = LegacyUtil.getIngredientCopy(ingredient, ingredientHelper);
         if (copy instanceof ItemStack) {

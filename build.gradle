@@ -19,18 +19,18 @@ apply plugin: 'net.minecraftforge.gradle.forge'
 
 version = mod_version
 group = mod_group
-archivesBaseName = mod_archives_name
+archivesBaseName = mod_archives_name + "-" + mc_version
 
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
 
 minecraft {
-	version = "1.12.2-14.23.5.2847"
+    version = "1.12.2-14.23.5.2847"
     mappings = "stable_39"
-	runDir = "run"
-    
-	replace '@VERSION@', project.version
-	// makeObfSourceJar = false
+    runDir = "run"
+
+    replace '@VERSION@', project.version
+    // makeObfSourceJar = false
     clientJvmArgs += "-Dfml.coreMods.load=com.github.vfyjxf.jeiutilities.asm.JeiUtilitiesLoadingPlugin"
     serverJvmArgs += "-Dfml.coreMods.load=com.github.vfyjxf.jeiutilities.asm.JeiUtilitiesLoadingPlugin"
 }
@@ -40,13 +40,13 @@ processResources {
     from(sourceSets.main.resources.srcDirs) {
         include 'mcmod.info'
         expand 'version': project.version,
-		'mod_id': mod_id,
-		'mod_name': mod_name,
-		'mod_author': mod_author,
-		'mod_description': mod_description,
-		'mc_version': mc_version,
-		'mod_version': mod_version,
-		'mod_icon': mod_icon
+                'mod_id': mod_id,
+                'mod_name': mod_name,
+                'mod_author': mod_author,
+                'mod_description': mod_description,
+                'mc_version': mc_version,
+                'mod_version': mod_version,
+                'mod_icon': mod_icon
     }
 
     from(sourceSets.main.resources.srcDirs) {
@@ -66,6 +66,14 @@ repositories {
         url = "https://modmaven.k-4u.nl"
     }
     maven {
+        name = "EnderIO"
+        url = "https://maven.tterrag.com/"
+    }
+    maven {
+        name = "EnderIO - Temp"
+        url = "https://maven.hypherionmc.me/"
+    }
+    maven {
         name = "CurseMaven"
         url = "https://www.cursemaven.com"
     }
@@ -76,17 +84,16 @@ dependencies {
 }
 
 task devJar(type: Jar) {
-	classifier = 'dev'
-	from sourceSets.main.output
+    classifier = 'dev'
+    from sourceSets.main.output
 }
 
 task sourcesJar(type: Jar) {
-	classifier = 'sources'
-	from sourceSets.main.allSource
+    classifier = 'sources'
+    from sourceSets.main.allSource
 }
 
 jar {
-    appendix project.minecraft.version
     manifest.attributes(
             'FMLCorePlugin': 'com.github.vfyjxf.jeiutilities.asm.JeiUtilitiesLoadingPlugin',
             'FMLCorePluginContainsFMLMod': 'true'
@@ -94,6 +101,6 @@ jar {
 }
 
 artifacts {
-	archives devJar
-	archives sourcesJar
+    archives devJar
+    archives sourcesJar
 }

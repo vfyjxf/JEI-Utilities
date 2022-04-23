@@ -1,4 +1,4 @@
-package com.github.vfyjxf.jeiutilities.jei;
+package com.github.vfyjxf.jeiutilities.gui.history;
 
 import com.github.vfyjxf.jeiutilities.config.JeiUtilitiesConfig;
 import mezz.jei.Internal;
@@ -44,12 +44,15 @@ import static com.github.vfyjxf.jeiutilities.jei.JeiUtilitiesPlugin.ingredientRe
 public class AdvancedIngredientGrid extends IngredientGrid {
 
     public static final int USE_ROWS = 2;
+    public static final int MIN_ROWS = 6;
 
     private int historySize;
     private int columns;
     private final IngredientListBatchRenderer guiHistoryIngredientSlots;
     @SuppressWarnings("rawtypes")
     private final List<IIngredientListElement> historyIngredientElements = new ArrayList<>();
+
+    private boolean showHistory;
 
     public AdvancedIngredientGrid() {
         super(GridAlignment.LEFT);
@@ -78,7 +81,12 @@ public class AdvancedIngredientGrid extends IngredientGrid {
             return false;
         }
 
-        rows = rows - USE_ROWS;
+        if (rows >= MIN_ROWS) {
+            rows = rows - USE_ROWS;
+            showHistory = true;
+        } else {
+            showHistory = false;
+        }
 
         for (int row = 0; row < rows; row++) {
             int y1 = y + (row * INGREDIENT_HEIGHT);
@@ -92,19 +100,20 @@ public class AdvancedIngredientGrid extends IngredientGrid {
             }
         }
 
-        for (int row = 0; row < USE_ROWS; row++) {
-            int y1 = y + ((row + rows) * INGREDIENT_HEIGHT);
-            for (int column = 0; column < columns; column++) {
-                int x1 = xOffset + (column * INGREDIENT_WIDTH);
-                IngredientListSlot ingredientListSlot = new IngredientListSlot(x1, y1, 1);
-                Rectangle stackArea = ingredientListSlot.getArea();
-                final boolean blocked = MathUtil.intersects(exclusionAreas, stackArea);
-                ingredientListSlot.setBlocked(blocked);
-                this.guiHistoryIngredientSlots.add(ingredientListSlot);
+        if (showHistory) {
+            for (int row = 0; row < USE_ROWS; row++) {
+                int y1 = y + ((row + rows) * INGREDIENT_HEIGHT);
+                for (int column = 0; column < columns; column++) {
+                    int x1 = xOffset + (column * INGREDIENT_WIDTH);
+                    IngredientListSlot ingredientListSlot = new IngredientListSlot(x1, y1, 1);
+                    Rectangle stackArea = ingredientListSlot.getArea();
+                    final boolean blocked = MathUtil.intersects(exclusionAreas, stackArea);
+                    ingredientListSlot.setBlocked(blocked);
+                    this.guiHistoryIngredientSlots.add(ingredientListSlot);
+                }
             }
+            guiHistoryIngredientSlots.set(0, this.historyIngredientElements);
         }
-
-        guiHistoryIngredientSlots.set(0, this.historyIngredientElements);
 
         return true;
     }
@@ -116,19 +125,24 @@ public class AdvancedIngredientGrid extends IngredientGrid {
 
         guiIngredientSlots.render(minecraft);
 
-        Rectangle firstRect = guiHistoryIngredientSlots.getAllGuiIngredientSlots().get(0).getArea();
-        GuiUtils.drawGradientRect(0, firstRect.x, firstRect.y, firstRect.x + firstRect.width * this.columns, firstRect.y + firstRect.height * USE_ROWS, JeiUtilitiesConfig.backgroundColour, JeiUtilitiesConfig.backgroundColour);
+        if (showHistory) {
+            Rectangle firstRect = guiHistoryIngredientSlots.getAllGuiIngredientSlots().get(0).getArea();
+            GuiUtils.drawGradientRect(0, firstRect.x, firstRect.y, firstRect.x + firstRect.width * this.columns, firstRect.y + firstRect.height * USE_ROWS, JeiUtilitiesConfig.getBackgroundColour(), JeiUtilitiesConfig.getBackgroundColour());
 
-        guiHistoryIngredientSlots.render(minecraft);
+            guiHistoryIngredientSlots.render(minecraft);
+
+        }
 
         if (!shouldDeleteItemOnClick(minecraft, mouseX, mouseY) && isMouseOver(mouseX, mouseY)) {
             IngredientRenderer hovered = guiIngredientSlots.getHovered(mouseX, mouseY);
             if (hovered != null) {
                 hovered.drawHighlight();
             }
-            IngredientRenderer hoveredHistory = guiHistoryIngredientSlots.getHovered(mouseX, mouseY);
-            if (hoveredHistory != null) {
-                hoveredHistory.drawHighlight();
+            if (showHistory) {
+                IngredientRenderer hoveredHistory = guiHistoryIngredientSlots.getHovered(mouseX, mouseY);
+                if (hoveredHistory != null) {
+                    hoveredHistory.drawHighlight();
+                }
             }
         }
 
@@ -147,9 +161,11 @@ public class AdvancedIngredientGrid extends IngredientGrid {
                 if (hovered != null) {
                     hovered.drawTooltip(minecraft, mouseX, mouseY);
                 }
-                IngredientRenderer hoveredHistory = getGuiHistoryIngredientSlots().getHovered(mouseX, mouseY);
-                if (hoveredHistory != null) {
-                    hoveredHistory.drawTooltip(minecraft, mouseX, mouseY);
+                if (showHistory) {
+                    IngredientRenderer hoveredHistory = getGuiHistoryIngredientSlots().getHovered(mouseX, mouseY);
+                    if (hoveredHistory != null) {
+                        hoveredHistory.drawTooltip(minecraft, mouseX, mouseY);
+                    }
                 }
             }
         }
@@ -162,11 +178,14 @@ public class AdvancedIngredientGrid extends IngredientGrid {
         if (clicked != null) {
             return clicked;
         }
-        ClickedIngredient<?> clickedHistory = this.guiHistoryIngredientSlots.getIngredientUnderMouse(mouseX, mouseY);
-        if (clickedHistory != null) {
-            clickedHistory.setAllowsCheating();
+        if (showHistory) {
+            ClickedIngredient<?> clickedHistory = this.guiHistoryIngredientSlots.getIngredientUnderMouse(mouseX, mouseY);
+            if (clickedHistory != null) {
+                clickedHistory.setAllowsCheating();
+            }
+            return clickedHistory;
         }
-        return clickedHistory;
+        return null;
     }
 
     private boolean shouldDeleteItemOnClick(Minecraft minecraft, int mouseX, int mouseY) {
@@ -222,9 +241,9 @@ public class AdvancedIngredientGrid extends IngredientGrid {
 
     }
 
-    public void removeElement(int index){
-    	historyIngredientElements.remove(index);
-    	guiHistoryIngredientSlots.set(0, historyIngredientElements);
+    public void removeElement(int index) {
+        historyIngredientElements.remove(index);
+        guiHistoryIngredientSlots.set(0, historyIngredientElements);
     }
 
     private <T> T normalize(T ingredient) {
@@ -238,16 +257,30 @@ public class AdvancedIngredientGrid extends IngredientGrid {
         return copy;
     }
 
-    private boolean areIngredientEqual(Object ingredient1, Object ingredient2) {
-        if (ingredient1 instanceof ItemStack && ingredient2 instanceof ItemStack) {
-            ItemStack itemStack1 = (ItemStack) ingredient1;
-            ItemStack itemStack2 = (ItemStack) ingredient2;
-            return itemStack1.isItemEqual(itemStack2) && ItemStack.areItemStackTagsEqual(itemStack1, itemStack2);
+    private boolean areIngredientEqual(@Nonnull Object ingredient1, @Nonnull Object ingredient2) {
+
+        if (ingredient1 == ingredient2) {
+            return true;
         }
-        if (ingredient1 instanceof FluidStack && ingredient2 instanceof FluidStack) {
-            return ((FluidStack) ingredient1).isFluidEqual((FluidStack) ingredient2);
+
+        if (ingredient1.getClass() == ingredient2.getClass()) {
+            IIngredientHelper<Object> ingredientHelper = ingredientRegistry.getIngredientHelper(ingredient1);
+            return ingredientHelper.getUniqueId(ingredient1).equals(ingredientHelper.getUniqueId(ingredient2));
         }
-        return ingredient1.hashCode() == ingredient2.hashCode();
+
+        return false;
     }
+
+    //TODO:implements it
+    /**
+     * An ingredient such as energy ingredient in ender:io and Multiblocked.
+     * It should not be added to the browsing history because it is meaningless in itself
+     *
+     * @return Whether the current ingredient is an ignored ingredient
+     */
+    private boolean isIgnoredIngredients() {
+        return false;
+    }
+
 
 }
