@@ -1,6 +1,7 @@
 jeiutilities.tooltip.recording=Recipe Record Configuration
 jeiutilities.tooltip.recording.mode=Current Mode : %s
-jeiutilities.tooltip.recording.description.restricted=Recipe for opening records while holding down the Shift key.
+jeiutilities.tooltip.recording.description.restricted=Open a recorded recipe or mark a recipe while holding down the Shift key.
+jeiutilities.tooltip.recording.description.enable=Recipes are not recorded or opened when Shift is pressed.
 
 jeiutilities.button.name.disable=Disable
 jeiutilities.button.name.enable=Enable

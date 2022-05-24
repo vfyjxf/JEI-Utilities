@@ -9,9 +9,14 @@ buildscript {
             name = "github"
             url = "https://github.com/juanmuscaria/maven/raw/master"
         }
+        maven {
+            name = "sponge"
+            url = "https://repo.spongepowered.org/maven"
+        }
     }
     dependencies {
         classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
+        classpath 'org.spongepowered:mixingradle:0.6-SNAPSHOT'
     }
 }
 
@@ -30,9 +35,16 @@ minecraft {
     runDir = "run"
 
     replace '@VERSION@', project.version
-    // makeObfSourceJar = false
-    clientJvmArgs += "-Dfml.coreMods.load=com.github.vfyjxf.jeiutilities.asm.JeiUtilitiesLoadingPlugin"
-    serverJvmArgs += "-Dfml.coreMods.load=com.github.vfyjxf.jeiutilities.asm.JeiUtilitiesLoadingPlugin"
+
+    def args = [
+            "-Dfml.coreMods.load=com.github.vfyjxf.jeiutilities.asm.JeiUtilitiesLoadingPlugin",
+            "-Dmixin.hotSwap=true",
+            "-Dmixin.checks.interfaces=true",
+            "-Dmixin.debug.export=true"
+    ]
+
+    clientJvmArgs.addAll(args)
+    serverJvmArgs.addAll(args)
 }
 
 processResources {
@@ -66,21 +78,22 @@ repositories {
         url = "https://modmaven.k-4u.nl"
     }
     maven {
-        name = "EnderIO"
-        url = "https://maven.tterrag.com/"
-    }
-    maven {
-        name = "EnderIO - Temp"
-        url = "https://maven.hypherionmc.me/"
+        url = 'https://maven.blamejared.com'
+        name = 'BlameJared Maven'
     }
     maven {
         name = "CurseMaven"
         url = "https://www.cursemaven.com"
     }
+    maven {
+        url "https://maven.cleanroommc.com"
+    }
 }
 
 dependencies {
     deobfCompile "mezz.jei:jei_${mc_version}:${jei_version}"
+    deobfCompile "CraftTweaker2:CraftTweaker2-MC1120-Main:1.12-4.1.20.613"
+    deobfCompile("zone.rong:mixinbooter:4.2")
 }
 
 task devJar(type: Jar) {
@@ -91,6 +104,10 @@ task devJar(type: Jar) {
 task sourcesJar(type: Jar) {
     classifier = 'sources'
     from sourceSets.main.allSource
+}
+
+runClient {
+    args '--username', 'developer'
 }
 
 jar {

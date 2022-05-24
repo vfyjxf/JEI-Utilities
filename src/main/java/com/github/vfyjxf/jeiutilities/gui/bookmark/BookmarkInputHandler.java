@@ -2,12 +2,17 @@ package com.github.vfyjxf.jeiutilities.gui.bookmark;
 
 import com.github.vfyjxf.jeiutilities.config.JeiUtilitiesConfig;
 import com.github.vfyjxf.jeiutilities.config.RecordMode;
+import com.github.vfyjxf.jeiutilities.helper.IngredientHelper;
+import com.github.vfyjxf.jeiutilities.helper.ReflectionUtils;
 import com.github.vfyjxf.jeiutilities.jei.JeiUtilitiesPlugin;
-import com.github.vfyjxf.jeiutilities.jei.bookmark.RecipeBookmarkList;
-import com.github.vfyjxf.jeiutilities.jei.bookmark.RecipeBookmarkList.RecipeInfo;
+import com.github.vfyjxf.jeiutilities.jei.ingredient.RecipeInfo;
+import it.unimi.dsi.fastutil.ints.IntArraySet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import mezz.jei.api.recipe.IFocus;
 import mezz.jei.api.recipe.IRecipeCategory;
+import mezz.jei.api.recipe.IRecipeWrapper;
 import mezz.jei.bookmarks.BookmarkList;
+import mezz.jei.config.Config;
 import mezz.jei.config.KeyBindings;
 import mezz.jei.gui.Focus;
 import mezz.jei.gui.ingredients.GuiIngredient;
@@ -20,18 +25,21 @@ import mezz.jei.gui.recipes.RecipesGui;
 import mezz.jei.input.IClickedIngredient;
 import mezz.jei.input.InputHandler;
 import mezz.jei.input.MouseHelper;
+import mezz.jei.util.ReflectionUtil;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
 import javax.annotation.Nonnull;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.List;
 
 public class BookmarkInputHandler {
@@ -42,14 +50,8 @@ public class BookmarkInputHandler {
     private static RecipeGuiLogic logic;
     private static BookmarkList bookmarkList;
     private static LeftAreaDispatcher leftAreaDispatcher;
-    private static Field recipeLayoutsField;
-    private static Field stateField;
-    private static Method containsMethod;
-    private static Method getIngredientUnderMouseForKeyMethod;
-    private static Method updateRecipesMethod;
 
-    private final RecipeBookmarkList recipeBookmarkList = new RecipeBookmarkList();
-    private Object ingredientUnderMouse;
+    private final IntSet clickHandled = new IntArraySet();
 
     public static BookmarkInputHandler getInstance() {
         if (instance == null) {
@@ -59,92 +61,81 @@ public class BookmarkInputHandler {
     }
 
     @SubscribeEvent(priority = EventPriority.HIGH)
-    public void onBookmarkRemove(GuiScreenEvent.KeyboardInputEvent event) {
-        if (ingredientUnderMouse == null) {
-            int eventKey = Keyboard.getEventKey();
+    public void onBookmarkListAdd(GuiScreenEvent.KeyboardInputEvent.Post event) {
 
-            if (KeyBindings.bookmark.isActiveAndMatches(eventKey)) {
-                IClickedIngredient<?> clicked = getIngredientUnderMouseForKey();
-                if (clicked != null) {
-                    ingredientUnderMouse = clicked.getValue();
-                }
-            }
+        if (JeiUtilitiesConfig.getRecordMode() == RecordMode.DISABLE) {
+            return;
         }
-    }
 
-    @SubscribeEvent(priority = EventPriority.LOW, receiveCanceled = true)
-    public void onBookmarkListAddOrRemove(GuiScreenEvent.KeyboardInputEvent event) {
-        if (event.isCanceled()) {
+        if (isContainerTextFieldFocused()) {
+            return;
+        }
 
-            if (JeiUtilitiesConfig.getRecordMode() == RecordMode.DISABLE) {
-                return;
-            }
+        final int eventKey = Keyboard.getEventKey();
+        boolean withShift = JeiUtilitiesConfig.getRecordMode() == RecordMode.RESTRICTED;
+        if (isAddBookmark(eventKey, withShift)) {
+            Pair<RecipeLayout, Object> output = getOutputUnderMouse();
+            if (output != null) {
+                IngredientLookupState state = ReflectionUtils.getField(RecipeGuiLogic.class, logic, "state");
+                if (state != null && state.getFocus() != null) {
+                    boolean isInputMode = state.getFocus().getMode() == IFocus.Mode.INPUT;
+                    String recipeCategoryUid = state.getRecipeCategories().get(state.getRecipeCategoryIndex()).getUid();
 
-            final int eventKey = Keyboard.getEventKey();
+                    IRecipeWrapper recipeWrapper = ReflectionUtils.getField(RecipeLayout.class, output.getLeft(), "recipeWrapper");
+                    RecipeInfo<?, ?> recipeInfo = new RecipeInfo<>(
+                            IngredientHelper.getNormalize(state.getFocus().getValue()),
+                            IngredientHelper.getNormalize(output.getRight()),
+                            recipeCategoryUid,
+                            state.getRecipeIndex(),
+                            isInputMode,
+                            recipeWrapper
+                    );
 
-            if (KeyBindings.bookmark.isActiveAndMatches(eventKey)) {
-
-                Object ingredient = getOutputUnderMouse();
-                //If the bookmark contains this ingredient, the current recipe is recorded
-                if (ingredient != null) {
-                    if (isBookmarkContains(ingredient)) {
-                        IngredientLookupState state = getState();
-                        if (state != null && state.getFocus() != null) {
-                            boolean isInputMode = state.getFocus().getMode() == IFocus.Mode.INPUT;
-                            String recipeCategoryUid = state.getRecipeCategories().get(state.getRecipeCategoryIndex()).getUid();
-                            RecipeInfo<?, ?> recipeInfo = new RecipeInfo<>(
-                                    RecipeBookmarkList.normalize(state.getFocus().getValue()),
-                                    RecipeBookmarkList.normalize(ingredient),
-                                    recipeCategoryUid,
-                                    state.getRecipeIndex(),
-                                    isInputMode
-                            );
-                            recipeBookmarkList.addRecipeInfo(recipeInfo);
+                    if (bookmarkList.remove(recipeInfo)) {
+                        if (bookmarkList.isEmpty() && Config.isBookmarkOverlayEnabled()) {
+                            Config.toggleBookmarkEnabled();
+                        }
+                        event.setCanceled(true);
+                    } else {
+                        if (!Config.isBookmarkOverlayEnabled()) {
+                            Config.toggleBookmarkEnabled();
+                        }
+                        if (bookmarkList.add(recipeInfo)) {
+                            event.setCanceled(true);
                         }
                     }
-                } else if (!isBookmarkContains(ingredientUnderMouse)) {
-                    recipeBookmarkList.removeRecipeInfo(ingredientUnderMouse);
-                    ingredientUnderMouse = null;
                 }
-
             }
         }
+
     }
 
     /**
      * open recorded recipe
      */
     @SubscribeEvent(priority = EventPriority.HIGH)
-    public void onMouseClicked(GuiScreenEvent.MouseInputEvent event) {
+    public void onMouseClicked(GuiScreenEvent.MouseInputEvent.Pre event) {
 
         if (JeiUtilitiesConfig.getRecordMode() == RecordMode.DISABLE) {
             return;
         }
 
-        if (JeiUtilitiesConfig.getRecordMode() == RecordMode.RESTRICTED && !GuiContainer.isShiftKeyDown()) {
-            return;
-        }
-
-        IClickedIngredient<?> clicked = leftAreaDispatcher.getIngredientUnderMouse(MouseHelper.getX(), MouseHelper.getY());
         final int eventButton = Mouse.getEventButton();
 
-        if (clicked != null && eventButton == 0) {
-            RecipeInfo<?, ?> recipeInfo = recipeBookmarkList.getRecipeInfo(clicked.getValue());
-            if (recipeInfo != null) {
-                IFocus.Mode mode = recipeInfo.isInputMode() ? IFocus.Mode.INPUT : IFocus.Mode.OUTPUT;
-                recipesGui.show(new Focus<Object>(mode, recipeInfo.getIngredient()));
-                JeiUtilitiesPlugin.getGrid().removeElement(0);
-                JeiUtilitiesPlugin.getGrid().addHistoryIngredient(recipeInfo.getResult());
-                IngredientLookupState state = getState();
-                if (state != null) {
-                    state.setRecipeCategoryIndex(getRecipeCategoryIndex(state, recipeInfo.getRecipeCategoryUid()));
-                    state.setRecipeIndex(recipeInfo.getRecipeIndex());
-                    updateRecipes();
-                    recipesGui.onStateChange();
-                    event.setCanceled(true);
+        if (eventButton > -1) {
+            if (Mouse.getEventButtonState()) {
+                if (!clickHandled.contains(eventButton)) {
+                    if (handleMouseClick(eventButton)) {
+                        clickHandled.add(eventButton);
+                        event.setCanceled(true);
+                    }
                 }
+            } else if (clickHandled.contains(eventButton)) {
+                clickHandled.remove(eventButton);
+                event.setCanceled(true);
             }
         }
+
     }
 
 
@@ -152,92 +143,136 @@ public class BookmarkInputHandler {
      * open recorded recipe
      */
     @SubscribeEvent(priority = EventPriority.HIGH)
-    public void onKeyPressed(GuiScreenEvent.KeyboardInputEvent event) {
+    public void onKeyPressed(GuiScreenEvent.KeyboardInputEvent.Post event) {
 
         if (JeiUtilitiesConfig.getRecordMode() == RecordMode.DISABLE) {
             return;
         }
 
+        char typedChar = Keyboard.getEventCharacter();
         int eventKey = Keyboard.getEventKey();
-        boolean withShift = JeiUtilitiesConfig.getRecordMode() == RecordMode.RESTRICTED;
+        boolean shouldHandleKey = (eventKey == 0 && typedChar >= 32) || Keyboard.getEventKeyState();
+        if (!shouldHandleKey) {
+            return;
+        }
 
-        if (isShowRecipe(eventKey, withShift)) {
+        event.setCanceled(handleFocusKeybindings(eventKey));
 
-            if (JeiUtilitiesConfig.getRecordMode() == RecordMode.RESTRICTED && !GuiContainer.isShiftKeyDown()) {
-                return;
-            }
+    }
 
-            IClickedIngredient<?> clicked = getIngredientUnderMouseForKey();
-            if (clicked != null) {
+    private boolean handleMouseClick(int mouseButton) {
+        IClickedIngredient<?> clicked = leftAreaDispatcher.getIngredientUnderMouse(MouseHelper.getX(), MouseHelper.getY());
+        if (clicked != null) {
+            Object ingredient = clicked.getValue();
 
-                RecipeInfo<?, ?> recipeInfo = recipeBookmarkList.getRecipeInfo(clicked.getValue());
-                if (recipeInfo != null) {
+            if (ingredient instanceof RecipeInfo) {
+                RecipeInfo<?, ?> recipeInfo = (RecipeInfo<?, ?>) ingredient;
+
+                if (mouseButton == 0) {
+
+                    //Use to invert the operation when shift is pressed.
+                    if (JeiUtilitiesConfig.getRecordMode() == RecordMode.RESTRICTED) {
+                        if (!GuiContainer.isShiftKeyDown()) {
+                            recipesGui.show(new Focus<>(IFocus.Mode.OUTPUT, recipeInfo.getResult()));
+                            return true;
+                        }
+                    } else {
+                        if (GuiContainer.isShiftKeyDown()) {
+                            recipesGui.show(new Focus<>(IFocus.Mode.OUTPUT, recipeInfo.getResult()));
+                            return true;
+                        }
+                    }
+
                     IFocus.Mode mode = recipeInfo.isInputMode() ? IFocus.Mode.INPUT : IFocus.Mode.OUTPUT;
-                    recipesGui.show(new Focus<Object>(mode, recipeInfo.getIngredient()));
+                    showRecipe(new Focus<>(mode, recipeInfo.getIngredient()));
                     JeiUtilitiesPlugin.getGrid().removeElement(0);
                     JeiUtilitiesPlugin.getGrid().addHistoryIngredient(recipeInfo.getResult());
-                    IngredientLookupState state = getState();
+                    IngredientLookupState state = ReflectionUtils.getField(RecipeGuiLogic.class, logic, "state");
                     if (state != null) {
                         state.setRecipeCategoryIndex(getRecipeCategoryIndex(state, recipeInfo.getRecipeCategoryUid()));
                         state.setRecipeIndex(recipeInfo.getRecipeIndex());
                         updateRecipes();
                         recipesGui.onStateChange();
-                        event.setCanceled(true);
+                        clickHandled.add(mouseButton);
+                        return true;
                     }
+                } else if (mouseButton == 1) {
+                    recipesGui.show(new Focus<>(IFocus.Mode.INPUT, recipeInfo.getResult()));
+                    return true;
                 }
-            }
-        }
-    }
 
-    @SuppressWarnings("unchecked")
-    private Object getOutputUnderMouse() {
-        List<RecipeLayout> recipeLayouts = null;
-        try {
-            recipeLayouts = (List<RecipeLayout>) recipeLayoutsField.get(recipesGui);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        }
-        if (recipeLayouts != null) {
-            for (RecipeLayout recipeLayout : recipeLayouts) {
-                GuiIngredient<?> clicked = recipeLayout.getGuiIngredientUnderMouse(MouseHelper.getX(), MouseHelper.getY());
-                if (clicked != null && !clicked.isInput()) {
-                    return clicked.getDisplayedIngredient();
-                }
             }
-        }
-        return null;
-    }
 
-    private boolean isBookmarkContains(Object ingredient) {
-        try {
-            return (boolean) containsMethod.invoke(bookmarkList, ingredient);
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            e.printStackTrace();
         }
         return false;
     }
 
-    private IClickedIngredient<?> getIngredientUnderMouseForKey() {
-        try {
-            return (IClickedIngredient<?>) getIngredientUnderMouseForKeyMethod.invoke(JeiUtilitiesPlugin.inputHandler, MouseHelper.getX(), MouseHelper.getY());
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            e.printStackTrace();
+    private boolean handleFocusKeybindings(int eventKey) {
+        final boolean showRecipe = isShowRecipe(eventKey);
+        final boolean showUses = KeyBindings.showUses.isActiveAndMatches(eventKey);
+
+        if (showRecipe || showUses) {
+            IClickedIngredient<?> clicked = leftAreaDispatcher.getIngredientUnderMouse(MouseHelper.getX(), MouseHelper.getY());
+            if (clicked != null) {
+
+                Object clickedIngredient = clicked.getValue();
+                if (clickedIngredient instanceof RecipeInfo) {
+                    RecipeInfo<?, ?> recipeInfo = (RecipeInfo<?, ?>) clickedIngredient;
+
+                    if (showRecipe) {
+
+                        if (JeiUtilitiesConfig.getRecordMode() == RecordMode.RESTRICTED) {
+                            if (!GuiContainer.isShiftKeyDown()) {
+                                showRecipe(new Focus<>(IFocus.Mode.OUTPUT, recipeInfo.getResult()));
+                                return true;
+                            }
+                        } else {
+                            if (GuiContainer.isShiftKeyDown()) {
+                                showRecipe(new Focus<>(IFocus.Mode.OUTPUT, recipeInfo.getResult()));
+                                return true;
+                            }
+                        }
+
+                        IFocus.Mode mode = recipeInfo.isInputMode() ? IFocus.Mode.INPUT : IFocus.Mode.OUTPUT;
+                        showRecipe(new Focus<>(mode, recipeInfo.getIngredient()));
+                        JeiUtilitiesPlugin.getGrid().addHistoryIngredient(recipeInfo.getResult());
+                        IngredientLookupState state = ReflectionUtils.getField(RecipeGuiLogic.class, logic, "state");
+                        if (state != null) {
+                            state.setRecipeCategoryIndex(getRecipeCategoryIndex(state, recipeInfo.getRecipeCategoryUid()));
+                            state.setRecipeIndex(recipeInfo.getRecipeIndex());
+                            updateRecipes();
+                            recipesGui.onStateChange();
+                        }
+
+                    } else {
+                        recipesGui.show(new Focus<>(IFocus.Mode.INPUT, recipeInfo.getResult()));
+                    }
+                    return true;
+
+                }
+
+            }
         }
-        return null;
+
+        return false;
     }
 
-    private IngredientLookupState getState() {
-        try {
-            return (IngredientLookupState) stateField.get(logic);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
+    private Pair<RecipeLayout, Object> getOutputUnderMouse() {
+        List<RecipeLayout> recipeLayouts = ReflectionUtils.getField(RecipesGui.class, recipesGui, "recipeLayouts");
+        if (recipeLayouts != null) {
+            for (RecipeLayout recipeLayout : recipeLayouts) {
+                GuiIngredient<?> clicked = recipeLayout.getGuiIngredientUnderMouse(MouseHelper.getX(), MouseHelper.getY());
+                if (clicked != null && !clicked.isInput()) {
+                    return Pair.of(recipeLayout, clicked.getDisplayedIngredient());
+                }
+            }
         }
         return null;
     }
 
     private void updateRecipes() {
         try {
-            updateRecipesMethod.invoke(logic);
+            ReflectionUtils.getMethod(RecipeGuiLogic.class, "updateRecipes", void.class).invoke(logic);
         } catch (IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
         }
@@ -252,12 +287,42 @@ public class BookmarkInputHandler {
         return 0;
     }
 
-    private boolean isShowRecipe(int keycode, boolean withShift) {
-        if (withShift) {
-            return keycode != 0 && KeyBindings.showRecipe.getKeyCode() == keycode && KeyBindings.showRecipe.getKeyConflictContext().isActive() && GuiContainer.isShiftKeyDown();
-        } else {
-            return KeyBindings.showRecipe.isActiveAndMatches(keycode);
+    private <V> void showRecipe(IFocus<V> focus) {
+        focus = Focus.check(focus);
+
+        if (logic.setFocus(focus)) {
+            try {
+                ReflectionUtils.getMethod(RecipesGui.class, "open", void.class).invoke(recipesGui);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                e.printStackTrace();
+            }
         }
+    }
+
+    private boolean isContainerTextFieldFocused() {
+        GuiScreen gui = Minecraft.getMinecraft().currentScreen;
+        if (gui == null) {
+            return false;
+        }
+        GuiTextField textField = ReflectionUtil.getFieldWithClass(gui, GuiTextField.class);
+        return textField != null && textField.getVisible() && textField.isFocused();
+    }
+
+    private boolean isAddBookmark(int keycode, boolean withShift) {
+        if (withShift) {
+            return keycode != 0 &&
+                    KeyBindings.bookmark.getKeyCode() == keycode
+                    && KeyBindings.bookmark.getKeyConflictContext().isActive() &&
+                    GuiContainer.isShiftKeyDown();
+        } else {
+            return KeyBindings.bookmark.isActiveAndMatches(keycode);
+        }
+    }
+
+    private boolean isShowRecipe(int keycode) {
+        return keycode != 0 &&
+                KeyBindings.showRecipe.getKeyCode() == keycode &&
+                KeyBindings.showRecipe.getKeyConflictContext().isActive();
     }
 
     public static void onInputHandlerSet() {
@@ -265,14 +330,6 @@ public class BookmarkInputHandler {
         logic = ObfuscationReflectionHelper.getPrivateValue(RecipesGui.class, recipesGui, "logic");
         bookmarkList = ObfuscationReflectionHelper.getPrivateValue(BookmarkOverlay.class, (BookmarkOverlay) JeiUtilitiesPlugin.jeiRuntime.getBookmarkOverlay(), "bookmarkList");
         leftAreaDispatcher = ObfuscationReflectionHelper.getPrivateValue(InputHandler.class, JeiUtilitiesPlugin.inputHandler, "leftAreaDispatcher");
-        recipeLayoutsField = ObfuscationReflectionHelper.findField(RecipesGui.class, "recipeLayouts");
-        stateField = ObfuscationReflectionHelper.findField(RecipeGuiLogic.class, "state");
-        containsMethod = ObfuscationReflectionHelper.findMethod(BookmarkList.class, "contains", boolean.class, Object.class);
-        getIngredientUnderMouseForKeyMethod = ObfuscationReflectionHelper.findMethod(InputHandler.class, "getIngredientUnderMouseForKey", IClickedIngredient.class, int.class, int.class);
-        updateRecipesMethod = ObfuscationReflectionHelper.findMethod(RecipeGuiLogic.class, "updateRecipes", void.class);
     }
 
-    public RecipeBookmarkList getRecipeBookmarkList() {
-        return recipeBookmarkList;
-    }
 }

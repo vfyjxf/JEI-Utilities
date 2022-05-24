@@ -4,6 +4,7 @@
 .settings
 .metadata
 bin
+logs
 build
 run
 minecraft

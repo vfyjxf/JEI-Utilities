@@ -1,6 +1,8 @@
 package com.github.vfyjxf.jeiutilities.gui.history;
 
 import com.github.vfyjxf.jeiutilities.config.JeiUtilitiesConfig;
+import com.github.vfyjxf.jeiutilities.config.SplittingMode;
+import com.github.vfyjxf.jeiutilities.helper.IngredientHelper;
 import mezz.jei.Internal;
 import mezz.jei.api.ingredients.IIngredientHelper;
 import mezz.jei.config.Config;
@@ -17,14 +19,12 @@ import mezz.jei.render.IngredientRenderer;
 import mezz.jei.runtime.JeiRuntime;
 import mezz.jei.startup.ForgeModIdHelper;
 import mezz.jei.util.GiveMode;
-import mezz.jei.util.LegacyUtil;
 import mezz.jei.util.MathUtil;
 import mezz.jei.util.Translator;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fml.client.config.GuiUtils;
 import net.minecraftforge.items.ItemHandlerHelper;
 
@@ -127,7 +127,24 @@ public class AdvancedIngredientGrid extends IngredientGrid {
 
         if (showHistory) {
             Rectangle firstRect = guiHistoryIngredientSlots.getAllGuiIngredientSlots().get(0).getArea();
-            GuiUtils.drawGradientRect(0, firstRect.x, firstRect.y, firstRect.x + firstRect.width * this.columns, firstRect.y + firstRect.height * USE_ROWS, JeiUtilitiesConfig.getBackgroundColour(), JeiUtilitiesConfig.getBackgroundColour());
+
+            if (JeiUtilitiesConfig.getSplittingMode() == SplittingMode.BACKGROUND) {
+                GuiUtils.drawGradientRect(
+                        0, firstRect.x, firstRect.y,
+                        firstRect.x + firstRect.width * this.columns,
+                        firstRect.y + firstRect.height * USE_ROWS,
+                        JeiUtilitiesConfig.getBackgroundColour(),
+                        JeiUtilitiesConfig.getBackgroundColour()
+                );
+            } else {
+                GuiUtils.drawGradientRect(
+                        0, firstRect.x, firstRect.y - 1,
+                        firstRect.x + firstRect.width * this.columns,
+                        firstRect.y + 2,
+                        JeiUtilitiesConfig.getBackgroundColour(),
+                        JeiUtilitiesConfig.getBackgroundColour()
+                );
+            }
 
             guiHistoryIngredientSlots.render(minecraft);
 
@@ -201,9 +218,7 @@ public class AdvancedIngredientGrid extends IngredientGrid {
                             IClickedIngredient<?> ingredientUnderMouse = getIngredientUnderMouse(mouseX, mouseY);
                             if (ingredientUnderMouse != null && ingredientUnderMouse.getValue() instanceof ItemStack) {
                                 ItemStack value = (ItemStack) ingredientUnderMouse.getValue();
-                                if (ItemHandlerHelper.canItemStacksStack(itemStack, value)) {
-                                    return false;
-                                }
+                                return !ItemHandlerHelper.canItemStacksStack(itemStack, value);
                             }
                         }
                         return true;
@@ -220,7 +235,7 @@ public class AdvancedIngredientGrid extends IngredientGrid {
 
     public void addHistoryIngredient(Object value) {
         if (value != null) {
-            Object normalized = normalize(value);
+            Object normalized = IngredientHelper.getNormalize(value);
             IIngredientListElement<?> ingredient = IngredientListElement.create(
                     normalized,
                     ingredientRegistry.getIngredientHelper(normalized),
@@ -244,17 +259,6 @@ public class AdvancedIngredientGrid extends IngredientGrid {
     public void removeElement(int index) {
         historyIngredientElements.remove(index);
         guiHistoryIngredientSlots.set(0, historyIngredientElements);
-    }
-
-    private <T> T normalize(T ingredient) {
-        IIngredientHelper<T> ingredientHelper = ingredientRegistry.getIngredientHelper(ingredient);
-        T copy = LegacyUtil.getIngredientCopy(ingredient, ingredientHelper);
-        if (copy instanceof ItemStack) {
-            ((ItemStack) copy).setCount(1);
-        } else if (copy instanceof FluidStack) {
-            ((FluidStack) copy).amount = 1000;
-        }
-        return copy;
     }
 
     private boolean areIngredientEqual(@Nonnull Object ingredient1, @Nonnull Object ingredient2, boolean matchesNbt) {
