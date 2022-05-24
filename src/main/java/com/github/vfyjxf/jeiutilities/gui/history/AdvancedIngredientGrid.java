@@ -3,6 +3,7 @@ package com.github.vfyjxf.jeiutilities.gui.history;
 import com.github.vfyjxf.jeiutilities.config.JeiUtilitiesConfig;
 import com.github.vfyjxf.jeiutilities.config.SplittingMode;
 import com.github.vfyjxf.jeiutilities.helper.IngredientHelper;
+import com.github.vfyjxf.jeiutilities.jei.ingredient.RecipeInfo;
 import mezz.jei.Internal;
 import mezz.jei.api.ingredients.IIngredientHelper;
 import mezz.jei.config.Config;
@@ -27,6 +28,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.client.config.GuiUtils;
 import net.minecraftforge.items.ItemHandlerHelper;
+import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -128,19 +130,17 @@ public class AdvancedIngredientGrid extends IngredientGrid {
         if (showHistory) {
             Rectangle firstRect = guiHistoryIngredientSlots.getAllGuiIngredientSlots().get(0).getArea();
 
-            if (JeiUtilitiesConfig.getSplittingMode() == SplittingMode.BACKGROUND) {
-                GuiUtils.drawGradientRect(
-                        0, firstRect.x, firstRect.y,
-                        firstRect.x + firstRect.width * this.columns,
-                        firstRect.y + firstRect.height * USE_ROWS,
-                        JeiUtilitiesConfig.getBackgroundColour(),
+            if (JeiUtilitiesConfig.getSplittingMode() == SplittingMode.DOTTED_LINE) {
+                drawSpillingArea(firstRect.x, firstRect.y,
+                        firstRect.width * this.columns,
+                        firstRect.height * USE_ROWS,
                         JeiUtilitiesConfig.getBackgroundColour()
                 );
             } else {
                 GuiUtils.drawGradientRect(
-                        0, firstRect.x, firstRect.y - 1,
+                        0, firstRect.x, firstRect.y,
                         firstRect.x + firstRect.width * this.columns,
-                        firstRect.y + 2,
+                        firstRect.y + firstRect.height * USE_ROWS,
                         JeiUtilitiesConfig.getBackgroundColour(),
                         JeiUtilitiesConfig.getBackgroundColour()
                 );
@@ -235,6 +235,11 @@ public class AdvancedIngredientGrid extends IngredientGrid {
 
     public void addHistoryIngredient(Object value) {
         if (value != null) {
+
+            if (value instanceof RecipeInfo){
+                return;
+            }
+
             Object normalized = IngredientHelper.getNormalize(value);
             IIngredientListElement<?> ingredient = IngredientListElement.create(
                     normalized,
@@ -276,6 +281,40 @@ public class AdvancedIngredientGrid extends IngredientGrid {
         }
 
         return false;
+    }
+
+    private void drawSpillingArea(int x, int y, int width, int height, int color) {
+
+        float alpha = (float) (color >> 24 & 255) / 255.0F;
+        float red = (float) (color >> 16 & 255) / 255.0F;
+        float green = (float) (color >> 8 & 255) / 255.0F;
+        float blue = (float) (color & 255) / 255.0F;
+
+        GlStateManager.pushMatrix();
+
+        GlStateManager.disableTexture2D();
+        GL11.glEnable(GL11.GL_LINE_STIPPLE);
+        GlStateManager.color(red, green, blue, alpha);
+        GL11.glLineWidth(2F);
+        GL11.glLineStipple(2, (short) 0x00FF);
+
+        GL11.glBegin(GL11.GL_LINE_LOOP);
+
+        GL11.glVertex2i(x, y);
+        GL11.glVertex2i(x + width, y);
+        GL11.glVertex2i(x + width, y + height);
+        GL11.glVertex2i(x, y + height);
+
+        GL11.glEnd();
+
+        GL11.glLineStipple(2, (short) 0xFFFF);
+        GL11.glLineWidth(2F);
+        GL11.glDisable(GL11.GL_LINE_STIPPLE);
+        GlStateManager.enableTexture2D();
+        GlStateManager.color(1F, 1F, 1F, 1F);
+
+        GlStateManager.popMatrix();
+
     }
 
     //TODO:implements it

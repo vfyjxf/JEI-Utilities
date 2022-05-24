@@ -20,7 +20,7 @@ public class JeiUtilitiesConfig {
 
     private static boolean enableHistory = true;
     private static boolean matchesNBTs = true;
-    private static SplittingMode splittingMode = SplittingMode.BACKGROUND;
+    private static SplittingMode splittingMode = SplittingMode.DOTTED_LINE;
     private static int backgroundColour = 0xee555555;
 
     private static boolean recordRecipes = true;
@@ -61,14 +61,14 @@ public class JeiUtilitiesConfig {
                 splittingMode = SplittingMode.valueOf(
                         config.getString("splittingMode",
                                 CATEGORY_HISTORY,
-                                SplittingMode.LINE.name(),
+                                SplittingMode.DOTTED_LINE.name(),
                                 "Splitting mode for the browsing history.\n" +
-                                        "Mode : BACKGROUND,LINE"
+                                        "Mode : BACKGROUND, DOTTED_LINE"
                         )
                 );
             } catch (IllegalArgumentException | NullPointerException e) {
                 //set default mode
-                splittingMode = SplittingMode.BACKGROUND;
+                splittingMode = SplittingMode.DOTTED_LINE;
             }
 
             backgroundColour = config.getInt("backgroundColour",

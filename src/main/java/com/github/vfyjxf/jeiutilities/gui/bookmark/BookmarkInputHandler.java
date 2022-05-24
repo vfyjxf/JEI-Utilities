@@ -71,6 +71,18 @@ public class BookmarkInputHandler {
             return;
         }
 
+        if (JeiUtilitiesConfig.getRecordMode() == RecordMode.ENABLE && GuiContainer.isShiftKeyDown()) {
+            IClickedIngredient<?> clicked = recipesGui.getIngredientUnderMouse(MouseHelper.getX(), MouseHelper.getY());
+            if (clicked != null) {
+                if (addOrRemoveBookmark(clicked.getValue())) {
+                    event.setCanceled(true);
+                    return;
+                }
+            } else {
+                return;
+            }
+        }
+
         final int eventKey = Keyboard.getEventKey();
         boolean withShift = JeiUtilitiesConfig.getRecordMode() == RecordMode.RESTRICTED;
         if (isAddBookmark(eventKey, withShift)) {
@@ -91,19 +103,10 @@ public class BookmarkInputHandler {
                             recipeWrapper
                     );
 
-                    if (bookmarkList.remove(recipeInfo)) {
-                        if (bookmarkList.isEmpty() && Config.isBookmarkOverlayEnabled()) {
-                            Config.toggleBookmarkEnabled();
-                        }
+                    if (addOrRemoveBookmark(recipeInfo)) {
                         event.setCanceled(true);
-                    } else {
-                        if (!Config.isBookmarkOverlayEnabled()) {
-                            Config.toggleBookmarkEnabled();
-                        }
-                        if (bookmarkList.add(recipeInfo)) {
-                            event.setCanceled(true);
-                        }
                     }
+
                 }
             }
         }
@@ -185,7 +188,6 @@ public class BookmarkInputHandler {
 
                     IFocus.Mode mode = recipeInfo.isInputMode() ? IFocus.Mode.INPUT : IFocus.Mode.OUTPUT;
                     showRecipe(new Focus<>(mode, recipeInfo.getIngredient()));
-                    JeiUtilitiesPlugin.getGrid().removeElement(0);
                     JeiUtilitiesPlugin.getGrid().addHistoryIngredient(recipeInfo.getResult());
                     IngredientLookupState state = ReflectionUtils.getField(RecipeGuiLogic.class, logic, "state");
                     if (state != null) {
@@ -223,18 +225,18 @@ public class BookmarkInputHandler {
 
                         if (JeiUtilitiesConfig.getRecordMode() == RecordMode.RESTRICTED) {
                             if (!GuiContainer.isShiftKeyDown()) {
-                                showRecipe(new Focus<>(IFocus.Mode.OUTPUT, recipeInfo.getResult()));
+                                recipesGui.show(new Focus<>(IFocus.Mode.OUTPUT, recipeInfo.getResult()));
                                 return true;
                             }
                         } else {
                             if (GuiContainer.isShiftKeyDown()) {
-                                showRecipe(new Focus<>(IFocus.Mode.OUTPUT, recipeInfo.getResult()));
+                                recipesGui.show(new Focus<>(IFocus.Mode.OUTPUT, recipeInfo.getResult()));
                                 return true;
                             }
                         }
 
                         IFocus.Mode mode = recipeInfo.isInputMode() ? IFocus.Mode.INPUT : IFocus.Mode.OUTPUT;
-                        showRecipe(new Focus<>(mode, recipeInfo.getIngredient()));
+                        recipesGui.show(new Focus<>(mode, recipeInfo.getIngredient()));
                         JeiUtilitiesPlugin.getGrid().addHistoryIngredient(recipeInfo.getResult());
                         IngredientLookupState state = ReflectionUtils.getField(RecipeGuiLogic.class, logic, "state");
                         if (state != null) {
@@ -268,6 +270,24 @@ public class BookmarkInputHandler {
             }
         }
         return null;
+    }
+
+    private boolean addOrRemoveBookmark(Object value) {
+        if (bookmarkList.remove(value)) {
+            if (bookmarkList.isEmpty() && Config.isBookmarkOverlayEnabled()) {
+                Config.toggleBookmarkEnabled();
+            }
+
+            return true;
+        } else {
+            if (!Config.isBookmarkOverlayEnabled()) {
+                Config.toggleBookmarkEnabled();
+            }
+            if (bookmarkList.add(value)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void updateRecipes() {

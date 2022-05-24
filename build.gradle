@@ -92,8 +92,7 @@ repositories {
 
 dependencies {
     deobfCompile "mezz.jei:jei_${mc_version}:${jei_version}"
-    deobfCompile "CraftTweaker2:CraftTweaker2-MC1120-Main:1.12-4.1.20.613"
-    deobfCompile("zone.rong:mixinbooter:4.2")
+//    deobfCompile("zone.rong:mixinbooter:4.2")
 }
 
 task devJar(type: Jar) {
