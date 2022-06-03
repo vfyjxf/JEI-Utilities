@@ -1,6 +1,7 @@
 package com.github.vfyjxf.jeiutilities.gui.bookmark;
 
 import com.github.vfyjxf.jeiutilities.config.JeiUtilitiesConfig;
+import com.github.vfyjxf.jeiutilities.config.KeyBindings;
 import com.github.vfyjxf.jeiutilities.config.RecordMode;
 import com.github.vfyjxf.jeiutilities.jei.JeiUtilitiesPlugin;
 import mezz.jei.api.gui.IDrawable;
@@ -44,6 +45,9 @@ public class RecordConfigButton extends GuiIconToggleButton {
         }
         if (currentMode == RecordMode.ENABLE) {
             tooltip.add(TextFormatting.GRAY + Translator.translateToLocal("jeiutilities.tooltip.recording.description.enable"));
+        }
+        if (currentMode != RecordMode.DISABLE) {
+            tooltip.add(TextFormatting.GRAY + Translator.translateToLocalFormatted("jeiutilities.tooltip.recording.information_1", KeyBindings.displayRecipe.getDisplayName()));
         }
     }
 
