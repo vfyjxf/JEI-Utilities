@@ -40,7 +40,7 @@ public class JeiUtilitiesPlugin implements IModPlugin {
      * This field is set by asm.
      */
     public static IRecipeRegistry recipeRegistry;
-    private static AdvancedIngredientGrid grid = new AdvancedIngredientGrid();
+    private static AdvancedIngredientGrid grid;
 
     @Override
     public void onRuntimeAvailable(@Nonnull IJeiRuntime jeiRuntime) {
@@ -49,7 +49,7 @@ public class JeiUtilitiesPlugin implements IModPlugin {
             ObfuscationReflectionHelper.setPrivateValue(
                     IngredientGridWithNavigation.class,
                     ObfuscationReflectionHelper.getPrivateValue(IngredientListOverlay.class, (IngredientListOverlay) jeiRuntime.getIngredientListOverlay(), "contents"),
-                    grid,
+                    grid = new AdvancedIngredientGrid(),
                     "ingredientGrid"
             );
         }

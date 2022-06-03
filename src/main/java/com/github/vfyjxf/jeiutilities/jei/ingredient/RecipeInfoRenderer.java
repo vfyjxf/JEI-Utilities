@@ -23,13 +23,9 @@ public class RecipeInfoRenderer implements IIngredientRenderer<RecipeInfo> {
             IIngredientRenderer<Object> ingredientRenderer = JeiUtilitiesPlugin.ingredientRegistry.getIngredientRenderer(ingredientType);
             ingredientRenderer.render(minecraft, xPosition, yPosition, ingredient.getResult());
             if (JeiUtilitiesConfig.isShowRecipeBookmarkReminders()) {
-                GlStateManager.disableLighting();
                 GlStateManager.disableDepth();
-                GlStateManager.disableBlend();
                 this.getFontRenderer(minecraft, ingredient).drawStringWithShadow("R", xPosition, yPosition - 2, 0xFF555555);
-                GlStateManager.enableLighting();
                 GlStateManager.enableDepth();
-                GlStateManager.enableBlend();
             }
         }
     }

@@ -1,7 +1,11 @@
 package com.github.vfyjxf.jeiutilities.gui.bookmark;
 
 import com.github.vfyjxf.jeiutilities.config.JeiUtilitiesConfig;
+import com.github.vfyjxf.jeiutilities.gui.recipe.RecipeLayoutLite;
+import com.github.vfyjxf.jeiutilities.jei.JeiUtilitiesPlugin;
+import com.github.vfyjxf.jeiutilities.jei.ingredient.RecipeInfo;
 import mezz.jei.bookmarks.BookmarkList;
+import mezz.jei.gui.Focus;
 import mezz.jei.gui.GuiHelper;
 import mezz.jei.gui.GuiScreenHelper;
 import mezz.jei.gui.elements.GuiIconToggleButton;
@@ -9,10 +13,14 @@ import mezz.jei.gui.overlay.IngredientGridWithNavigation;
 import mezz.jei.gui.overlay.bookmarks.BookmarkOverlay;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
+import org.lwjgl.input.Keyboard;
 
 import javax.annotation.Nonnull;
 import java.awt.*;
+import java.util.Objects;
 import java.util.Set;
+
+import static com.github.vfyjxf.jeiutilities.config.KeyBindings.displayRecipe;
 
 @SuppressWarnings("unused")
 public class AdvancedBookmarkOverlay extends BookmarkOverlay {
@@ -21,6 +29,9 @@ public class AdvancedBookmarkOverlay extends BookmarkOverlay {
 
     private final IngredientGridWithNavigation contents;
     private final GuiIconToggleButton recordConfigButton;
+
+    private RecipeInfo<?, ?> infoUnderMouse;
+    private RecipeLayoutLite recipeLayout;
 
     public static BookmarkOverlay create(BookmarkList bookmarkList, GuiHelper guiHelper, GuiScreenHelper guiScreenHelper) {
         if (JeiUtilitiesConfig.getRecordRecipes()) {
@@ -57,9 +68,42 @@ public class AdvancedBookmarkOverlay extends BookmarkOverlay {
     }
 
     @Override
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public void drawTooltips(@Nonnull Minecraft minecraft, int mouseX, int mouseY) {
-        super.drawTooltips(minecraft, mouseX, mouseY);
-        this.recordConfigButton.drawTooltips(minecraft, mouseX, mouseY);
+        boolean renderRecipe = false;
+
+        if (Keyboard.isKeyDown(displayRecipe.getKeyCode())) {
+            Object ingredientUnderMouse = this.getIngredientUnderMouse();
+            if (ingredientUnderMouse instanceof RecipeInfo) {
+                RecipeInfo recipeInfo = (RecipeInfo) ingredientUnderMouse;
+                RecipeLayoutLite recipeLayout;
+                if (this.infoUnderMouse == recipeInfo) {
+                    recipeLayout = this.recipeLayout;
+                } else {
+                    this.infoUnderMouse = recipeInfo;
+                    recipeLayout = RecipeLayoutLite.create(
+                            Objects.requireNonNull(JeiUtilitiesPlugin.recipeRegistry.getRecipeCategory(recipeInfo.getRecipeCategoryUid())),
+                            recipeInfo.getRecipeWrapper(),
+                            new Focus<>(recipeInfo.getMode(),
+                                    recipeInfo.getIngredient()),
+                            mouseX,
+                            mouseY);
+                    this.recipeLayout = recipeLayout;
+                }
+
+                if (recipeLayout != null) {
+                    recipeLayout.drawRecipe(minecraft, mouseX, mouseY);
+                    renderRecipe = true;
+                }
+
+            }
+        }
+
+        if (!renderRecipe) {
+            super.drawTooltips(minecraft, mouseX, mouseY);
+            this.recordConfigButton.drawTooltips(minecraft, mouseX, mouseY);
+        }
+
     }
 
     @Override

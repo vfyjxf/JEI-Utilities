@@ -5,6 +5,7 @@ import com.github.vfyjxf.jeiutilities.helper.ReflectionUtils;
 import com.github.vfyjxf.jeiutilities.jei.JeiUtilitiesPlugin;
 import mezz.jei.api.ingredients.IIngredientRenderer;
 import mezz.jei.api.ingredients.IIngredients;
+import mezz.jei.api.recipe.IFocus;
 import mezz.jei.api.recipe.IIngredientType;
 import mezz.jei.api.recipe.IRecipeWrapper;
 import mezz.jei.ingredients.Ingredients;
@@ -64,8 +65,8 @@ public class RecipeInfo<R, I> {
         return recipeIndex;
     }
 
-    public boolean isInputMode() {
-        return isInputMode;
+    public IFocus.Mode getMode() {
+        return isInputMode ? IFocus.Mode.INPUT : IFocus.Mode.OUTPUT;
     }
 
     public IIngredientRenderer<?> getResultIngredientRenderer() {

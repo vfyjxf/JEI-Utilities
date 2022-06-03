@@ -236,7 +236,7 @@ public class AdvancedIngredientGrid extends IngredientGrid {
     public void addHistoryIngredient(Object value) {
         if (value != null) {
 
-            if (value instanceof RecipeInfo){
+            if (value instanceof RecipeInfo) {
                 return;
             }
 
