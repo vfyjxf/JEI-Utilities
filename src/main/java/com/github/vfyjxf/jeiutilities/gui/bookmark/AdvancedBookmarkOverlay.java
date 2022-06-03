@@ -17,7 +17,6 @@ import org.lwjgl.input.Keyboard;
 
 import javax.annotation.Nonnull;
 import java.awt.*;
-import java.util.Objects;
 import java.util.Set;
 
 import static com.github.vfyjxf.jeiutilities.config.KeyBindings.displayRecipe;
@@ -81,13 +80,13 @@ public class AdvancedBookmarkOverlay extends BookmarkOverlay {
                     recipeLayout = this.recipeLayout;
                 } else {
                     this.infoUnderMouse = recipeInfo;
+
                     recipeLayout = RecipeLayoutLite.create(
-                            Objects.requireNonNull(JeiUtilitiesPlugin.recipeRegistry.getRecipeCategory(recipeInfo.getRecipeCategoryUid())),
+                            JeiUtilitiesPlugin.recipeRegistry.getRecipeCategory(recipeInfo.getRecipeCategoryUid()),
                             recipeInfo.getRecipeWrapper(),
                             new Focus<>(recipeInfo.getMode(),
                                     recipeInfo.getIngredient()),
-                            mouseX,
-                            mouseY);
+                            mouseX, mouseY);
                     this.recipeLayout = recipeLayout;
                 }
 

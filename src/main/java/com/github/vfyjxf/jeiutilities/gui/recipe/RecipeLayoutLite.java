@@ -159,11 +159,12 @@ public class RecipeLayoutLite implements IRecipeLayoutDrawable {
         GlStateManager.popMatrix();
         GlStateManager.enableDepth();
 
-        minecraft.getRenderItem().zLevel += 120.0F;
+        GlStateManager.pushMatrix();
+        GlStateManager.translate(0.0F, 0.0F, 200.0F);
         for (GuiIngredientGroup<?> guiIngredientGroup : guiIngredientGroups.values()) {
             guiIngredientGroup.draw(minecraft, posX, posY, highlightColor, mouseX, mouseY);
         }
-        minecraft.getRenderItem().zLevel -= 120.0F;
+        GlStateManager.popMatrix();
 
         GlStateManager.disableBlend();
         GlStateManager.disableLighting();
