@@ -56,6 +56,24 @@ public class IngredientHelper {
         return copy;
     }
 
+    public static boolean ingredientEquals(Object ingredient1, Object ingredient2) {
+
+        if (ingredient1 == ingredient2){
+            return true;
+        }
+
+        if (ingredient1 == null || ingredient2 == null){
+            return false;
+        }
+
+        if (ingredient1.getClass() == ingredient2.getClass()){
+            IIngredientHelper<Object> ingredientHelper = ingredientRegistry.getIngredientHelper(ingredient1);
+            return ingredientHelper.getUniqueId(ingredient1).equals(ingredientHelper.getUniqueId(ingredient2));
+        }
+
+        return false;
+    }
+
     private static ItemStack getItemStackFromUid(String uid) {
         try {
             NBTTagCompound itemStackAsNbt = JsonToNBT.getTagFromJson(uid);

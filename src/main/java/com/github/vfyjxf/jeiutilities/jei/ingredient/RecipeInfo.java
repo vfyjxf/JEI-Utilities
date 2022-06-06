@@ -8,6 +8,7 @@ import mezz.jei.api.ingredients.IIngredients;
 import mezz.jei.api.recipe.IFocus;
 import mezz.jei.api.recipe.IIngredientType;
 import mezz.jei.api.recipe.IRecipeWrapper;
+import mezz.jei.api.recipe.wrapper.ICraftingRecipeWrapper;
 import mezz.jei.ingredients.Ingredients;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -39,7 +40,38 @@ public class RecipeInfo<R, I> {
      */
     private final IRecipeWrapper recipeWrapper;
 
-    public RecipeInfo(@Nonnull I ingredient, @Nonnull R result, String recipeCategoryUid, int recipeIndex, boolean isInputMode, @Nonnull IRecipeWrapper recipeWrapper) {
+    public static RecipeInfo create(@Nonnull Object ingredient,
+                                          @Nonnull Object result,
+                                          String recipeCategoryUid,
+                                          int recipeIndex,
+                                          boolean isInputMode,
+                                          @Nonnull IRecipeWrapper recipeWrapper
+    ) {
+        if (recipeWrapper instanceof ICraftingRecipeWrapper) {
+            ICraftingRecipeWrapper craftingWrapper = (ICraftingRecipeWrapper) recipeWrapper;
+            if (craftingWrapper.getRegistryName() != null && ingredient instanceof ItemStack && result instanceof ItemStack) {
+                return new CraftingRecipeInfo(
+                        (ItemStack) ingredient,
+                        (ItemStack) result,
+                        recipeCategoryUid,
+                        recipeIndex,
+                        isInputMode,
+                        craftingWrapper,
+                        craftingWrapper.getRegistryName()
+                );
+            }
+        }
+
+        return new RecipeInfo<>(ingredient, result, recipeCategoryUid, recipeIndex, isInputMode, recipeWrapper);
+    }
+
+    public RecipeInfo(@Nonnull I ingredient,
+                      @Nonnull R result,
+                      String recipeCategoryUid,
+                      int recipeIndex,
+                      boolean isInputMode,
+                      @Nonnull IRecipeWrapper recipeWrapper
+    ) {
         this.ingredient = ingredient;
         this.result = result;
         this.recipeCategoryUid = recipeCategoryUid;
@@ -67,6 +99,10 @@ public class RecipeInfo<R, I> {
 
     public IFocus.Mode getMode() {
         return isInputMode ? IFocus.Mode.INPUT : IFocus.Mode.OUTPUT;
+    }
+
+    public boolean isInputMode() {
+        return isInputMode;
     }
 
     public IIngredientRenderer<?> getResultIngredientRenderer() {
@@ -99,7 +135,7 @@ public class RecipeInfo<R, I> {
                 "}";
     }
 
-    private <T> String getIngredientString(T ingredient) {
+    protected <T> String getIngredientString(T ingredient) {
         if (ingredient instanceof ItemStack) {
             //replace " -> \"
             return MARKER_STACK + ((ItemStack) ingredient).writeToNBT(new NBTTagCompound()).toString().replace("\"", "\\\"");
@@ -108,10 +144,10 @@ public class RecipeInfo<R, I> {
         }
     }
 
-    private String getInputsString() {
+    protected String getInputsString() {
         IIngredients recipeIngredients = new Ingredients();
         recipeWrapper.getIngredients(recipeIngredients);
-        Map<IIngredientType, List<List>> allInputs = ReflectionUtils.getField(
+        Map<IIngredientType, List<List>> allInputs = ReflectionUtils.getFieldValue(
                 Ingredients.class,
                 recipeIngredients,
                 "inputs"

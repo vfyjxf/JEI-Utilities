@@ -14,7 +14,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 @SuppressWarnings("rawtypes")
-public class RecipeInfoRenderer implements IIngredientRenderer<RecipeInfo> {
+public class RecipeInfoRenderer<T extends RecipeInfo> implements IIngredientRenderer<T> {
 
     @Override
     public void render(@Nonnull Minecraft minecraft, int xPosition, int yPosition, @Nullable RecipeInfo ingredient) {

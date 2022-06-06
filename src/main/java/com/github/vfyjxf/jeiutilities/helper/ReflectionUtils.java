@@ -16,26 +16,39 @@ public final class ReflectionUtils {
     private static final Map<FieldDescriptor, Field> FIELD_CACHE = new HashMap<>();
     private static final Map<MethodDescriptor, Method> METHOD_CACHE = new HashMap<>();
 
-    public static <T, E> T getField(@Nonnull Class<? extends E> clazz, @Nonnull E object, @Nonnull String fieldName) {
-        return getField(object, new FieldDescriptor(clazz, fieldName, false));
+    public static <T> Field findField(@Nonnull Class<? extends T> classToAccess, @Nonnull String fieldName) {
+        FieldDescriptor fieldDescriptor = new FieldDescriptor(classToAccess, fieldName);
+        Field field = FIELD_CACHE.get(fieldDescriptor);
+        if (field == null) {
+            field = ObfuscationReflectionHelper.findField(fieldDescriptor.clazz, fieldDescriptor.fieldName);
+            if (!field.isAccessible()) {
+                field.setAccessible(true);
+            }
+            FIELD_CACHE.put(fieldDescriptor, field);
+        }
+        return field;
     }
 
-    public static <T> T getStaticField(@Nonnull Class<?> clazz, @Nonnull String fieldName) {
-        return getField(null, new FieldDescriptor(clazz, fieldName, true));
+    public static <T, E> T getFieldValue(@Nonnull Class<? extends E> classToAccess, @Nonnull E object, @Nonnull String fieldName) {
+        return getFieldValue(object, new FieldDescriptor(classToAccess, fieldName, false));
+    }
+
+    public static <T> T getStaticFieldValue(@Nonnull Class<?> classToAccess, @Nonnull String fieldName) {
+        return getFieldValue(null, new FieldDescriptor(classToAccess, fieldName, true));
+    }
+
+    public static <T, E> void setPrivateValue(Class<? super T> classToAccess, @Nullable T instance, @Nullable E value, String fieldName) {
+        try {
+            findField(classToAccess, fieldName).set(instance, value);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> T getField(@Nullable Object obj, @Nonnull FieldDescriptor fieldDescriptor) {
+    private static <T> T getFieldValue(@Nullable Object obj, @Nonnull FieldDescriptor fieldDescriptor) {
         try {
-            Field field = FIELD_CACHE.get(fieldDescriptor);
-            if (field == null) {
-                field = ObfuscationReflectionHelper.findField(fieldDescriptor.clazz, fieldDescriptor.fieldName);
-                if (!field.isAccessible()) {
-                    field.setAccessible(true);
-                }
-                FIELD_CACHE.put(fieldDescriptor, field);
-            }
-            return (T) field.get(obj);
+            return (T) (findField(fieldDescriptor.clazz, fieldDescriptor.fieldName).get(obj));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -62,6 +75,10 @@ public final class ReflectionUtils {
             this.clazz = clazz;
             this.fieldName = fieldName;
             this.isStatic = isStatic;
+        }
+
+        public FieldDescriptor(@Nonnull Class<?> clazz, @Nonnull String fieldName) {
+            this(clazz, fieldName, false);
         }
 
         @Override

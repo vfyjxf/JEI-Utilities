@@ -50,7 +50,7 @@ public class JEIUtilities {
         if (JeiUtilitiesConfig.getRecordRecipes() || JeiUtilitiesConfig.isEnableHistory()) {
             JeiUtilitiesPlugin.inputHandler = ObfuscationReflectionHelper.getPrivateValue(Internal.class, null, "inputHandler");
             if (JeiUtilitiesConfig.getRecordRecipes()) {
-                BookmarkInputHandler.onInputHandlerSet();
+                BookmarkInputHandler.getInstance().onInputHandlerSet();
             }
         }
         logger.info("JEI Utilities Loading Complete...");

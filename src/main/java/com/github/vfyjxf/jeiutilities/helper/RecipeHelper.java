@@ -2,12 +2,11 @@ package com.github.vfyjxf.jeiutilities.helper;
 
 import com.github.vfyjxf.jeiutilities.jei.ingredient.RecipeInfo;
 import mezz.jei.api.ingredients.IIngredientHelper;
-import mezz.jei.api.recipe.IFocus;
-import mezz.jei.api.recipe.IIngredientType;
-import mezz.jei.api.recipe.IRecipeCategory;
-import mezz.jei.api.recipe.IRecipeWrapper;
+import mezz.jei.api.recipe.*;
+import mezz.jei.api.recipe.wrapper.ICraftingRecipeWrapper;
 import mezz.jei.gui.Focus;
 import mezz.jei.ingredients.Ingredients;
+import net.minecraft.util.ResourceLocation;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nonnull;
@@ -20,7 +19,7 @@ import static com.github.vfyjxf.jeiutilities.jei.JeiUtilitiesPlugin.recipeRegist
 public class RecipeHelper {
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    public static <V, T> Pair<IRecipeWrapper, Integer> getRecipeWrapperAndIndex(@Nonnull Map<IIngredientType, List<String>> recipeUidMap, String recipeCategoryUid, T recipeOutput, @Nonnull IFocus<V> focus) {
+    public static <V, T> Pair<IRecipeWrapper, Integer> getRecipeWrapperAndIndex(@Nonnull Map<IIngredientType, List<String>> recipeUidMap, @Nonnull String recipeCategoryUid, @Nonnull T recipeOutput, @Nonnull IFocus<V> focus) {
         IRecipeCategory recipeCategory = recipeRegistry.getRecipeCategory(recipeCategoryUid);
         if (recipeCategory != null) {
             IIngredientHelper<V> ingredientHelper = ingredientRegistry.getIngredientHelper(focus.getValue());
@@ -28,19 +27,20 @@ public class RecipeHelper {
             List<IRecipeWrapper> recipes = recipeRegistry.getRecipeWrappers(recipeCategory, translatedFocus);
             IIngredientType<T> outputType = ingredientRegistry.getIngredientType(recipeOutput);
             String outputUid = IngredientHelper.getUniqueId(recipeOutput);
-            List<IRecipeWrapper> outputMatchRecipes = recipes.stream()
+            List<IRecipeWrapper> outputMatchRecipes = recipes.parallelStream()
                     .filter(recipe -> {
-                        Ingredients outputIngredients = new Ingredients();
-                        recipe.getIngredients(outputIngredients);
-                        List<List<T>> outputSlots = outputIngredients.getOutputs(outputType);
-                        return outputSlots.stream()
-                                .flatMap(Collection::stream)
-                                .map(t -> IngredientHelper.getUniqueId(IngredientHelper.getNormalize(t)))
-                                .anyMatch(outputIngredientUid -> outputIngredientUid.equals(outputUid));
-                    }).collect(Collectors.toCollection(ArrayList::new));
-            return outputMatchRecipes.stream()
+                                Ingredients outputIngredients = new Ingredients();
+                                recipe.getIngredients(outputIngredients);
+                                List<List<T>> outputSlots = outputIngredients.getOutputs(outputType);
+                                return outputSlots.parallelStream()
+                                        .flatMap(Collection::stream)
+                                        .map(t -> IngredientHelper.getUniqueId(IngredientHelper.getNormalize(t)))
+                                        .anyMatch(outputIngredientUid -> outputIngredientUid.equals(outputUid));
+                            }
+                    ).collect(Collectors.toList());
+            return outputMatchRecipes.parallelStream()
                     .filter(recipe -> isRecipeMatch(recipe, recipeUidMap))
-                    .findFirst()
+                    .findAny()
                     .map(recipe -> Pair.of(recipe, recipes.indexOf(recipe)))
                     .orElse(null);
         }
@@ -48,10 +48,43 @@ public class RecipeHelper {
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
+    public static <V, T> Pair<ICraftingRecipeWrapper, Integer> getCraftingRecipeWrapperAndIndex(@Nonnull ResourceLocation registerName, @Nonnull String recipeCategoryUid, @Nonnull T recipeOutput, @Nonnull IFocus<V> focus) {
+        IRecipeCategory recipeCategory = recipeRegistry.getRecipeCategory(recipeCategoryUid);
+        if (recipeCategory != null && recipeCategory.getUid().equals(VanillaRecipeCategoryUid.CRAFTING)) {
+            IIngredientHelper<V> ingredientHelper = ingredientRegistry.getIngredientHelper(focus.getValue());
+            IFocus<?> translatedFocus = ingredientHelper.translateFocus(focus, Focus::new);
+            //In fact, we know that the returned RecipeWrapper instanceof ICraftingRecipeWrapper.
+            List<ICraftingRecipeWrapper> craftingRecipes = recipeRegistry.getRecipeWrappers(recipeCategory, translatedFocus);
+
+            List<ICraftingRecipeWrapper> registerNameMatchRecipes = craftingRecipes.parallelStream()
+                    .filter(recipe -> registerName.equals(recipe.getRegistryName()))
+                    .collect(Collectors.toList());
+
+            return registerNameMatchRecipes.parallelStream()
+                    .filter(recipe -> {
+                                Ingredients outputIngredients = new Ingredients();
+                                recipe.getIngredients(outputIngredients);
+                                List<List<T>> outputSlots = outputIngredients.getOutputs(ingredientRegistry.getIngredientType(recipeOutput));
+                                return outputSlots.parallelStream()
+                                        .flatMap(Collection::stream)
+                                        .map(t -> IngredientHelper.getUniqueId(IngredientHelper.getNormalize(t)))
+                                        .anyMatch(outputIngredientUid -> outputIngredientUid.equals(IngredientHelper.getUniqueId(recipeOutput)));
+                            }
+                    )
+                    .findAny()
+                    .map(recipe -> Pair.of(recipe, craftingRecipes.indexOf(recipe)))
+                    .orElse(null);
+
+        }
+
+        return null;
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
     private static boolean isRecipeMatch(IRecipeWrapper recipeWrapper, Map<IIngredientType, List<String>> recipeUidMap) {
         Ingredients recipeIngredients = new Ingredients();
         recipeWrapper.getIngredients(recipeIngredients);
-        Set<IIngredientType> ingredientTypes = ((Map<IIngredientType, List<List>>) ReflectionUtils.getField(
+        Set<IIngredientType> ingredientTypes = ((Map<IIngredientType, List<List>>) ReflectionUtils.getFieldValue(
                 Ingredients.class,
                 recipeIngredients,
                 "inputs"

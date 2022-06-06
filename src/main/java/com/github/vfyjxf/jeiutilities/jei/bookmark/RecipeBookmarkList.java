@@ -4,6 +4,8 @@ import com.github.vfyjxf.jeiutilities.JEIUtilities;
 import com.github.vfyjxf.jeiutilities.config.JeiUtilitiesConfig;
 import com.github.vfyjxf.jeiutilities.helper.IngredientHelper;
 import com.github.vfyjxf.jeiutilities.helper.RecipeHelper;
+import com.github.vfyjxf.jeiutilities.helper.ReflectionUtils;
+import com.github.vfyjxf.jeiutilities.jei.ingredient.CraftingRecipeInfo;
 import com.github.vfyjxf.jeiutilities.jei.ingredient.RecipeInfo;
 import com.google.gson.*;
 import mezz.jei.api.ingredients.IIngredientHelper;
@@ -11,6 +13,7 @@ import mezz.jei.api.ingredients.VanillaTypes;
 import mezz.jei.api.recipe.IFocus;
 import mezz.jei.api.recipe.IIngredientType;
 import mezz.jei.api.recipe.IRecipeWrapper;
+import mezz.jei.api.recipe.wrapper.ICraftingRecipeWrapper;
 import mezz.jei.bookmarks.BookmarkList;
 import mezz.jei.config.Config;
 import mezz.jei.gui.Focus;
@@ -24,7 +27,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTException;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
+import net.minecraft.util.ResourceLocation;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -57,8 +60,8 @@ public class RecipeBookmarkList extends BookmarkList {
 
     public RecipeBookmarkList(IngredientRegistry ingredientRegistry) {
         super(ingredientRegistry);
-        list = ObfuscationReflectionHelper.getPrivateValue(BookmarkList.class, this, "list");
-        listeners = ObfuscationReflectionHelper.getPrivateValue(BookmarkList.class, this, "listeners");
+        list = ReflectionUtils.getFieldValue(BookmarkList.class, this, "list");
+        listeners = ReflectionUtils.getFieldValue(BookmarkList.class, this, "listeners");
     }
 
     @Override
@@ -165,9 +168,7 @@ public class RecipeBookmarkList extends BookmarkList {
         String ingredientUid = jsonObject.get("ingredient").getAsString();
         String resultUid = jsonObject.get("result").getAsString();
         String recipeCategoryUid = jsonObject.get("recipeCategoryUid").getAsString();
-        JsonArray inputsArray = jsonObject.get("inputs").getAsJsonArray();
 
-        Map<IIngredientType, List<String>> recipeUidMap = getRecipeUidMap(inputsArray);
         Object ingredientObject = loadIngredientFromJson(ingredientUid, otherIngredientTypes);
         Object resultObject = loadIngredientFromJson(resultUid, otherIngredientTypes);
 
@@ -177,18 +178,52 @@ public class RecipeBookmarkList extends BookmarkList {
         }
 
         boolean isInputMode = jsonObject.get("isInputMode").getAsBoolean();
-
         IFocus.Mode mode = isInputMode ? IFocus.Mode.INPUT : IFocus.Mode.OUTPUT;
-        Pair<IRecipeWrapper, Integer> recipePair = RecipeHelper.getRecipeWrapperAndIndex(recipeUidMap, recipeCategoryUid, resultObject, new Focus<>(mode, ingredientObject));
 
+        if (jsonObject.has("registryName")) {
+            if (ingredientObject instanceof ItemStack && resultObject instanceof ItemStack) {
 
-        if (recipePair == null) {
-            JEIUtilities.logger.error("Failed to find the corresponding recipe, found the invalid recipe record :\n{}", recipeInfoString);
-            return null;
+                ResourceLocation registryName = new ResourceLocation(jsonObject.get("registryName").getAsString());
+                Pair<ICraftingRecipeWrapper, Integer> recipePair = RecipeHelper.getCraftingRecipeWrapperAndIndex(registryName, recipeCategoryUid, resultObject, new Focus<>(mode, ingredientObject));
+
+                if (recipePair == null) {
+                    JEIUtilities.logger.error("Failed to find the corresponding recipe, found the invalid recipe record :\n{}", recipeInfoString);
+                    return null;
+                }
+
+                return new CraftingRecipeInfo((ItemStack) ingredientObject,
+                        (ItemStack) resultObject,
+                        recipeCategoryUid,
+                        recipePair.getRight(),
+                        isInputMode,
+                        recipePair.getLeft(),
+                        registryName
+                );
+
+            }
         }
 
-        return new RecipeInfo<>(ingredientObject, resultObject, recipeCategoryUid, recipePair.getRight(), isInputMode, recipePair.getLeft());
+        if (jsonObject.has("inputs")) {
+            JsonArray inputsArray = jsonObject.get("inputs").getAsJsonArray();
+            Map<IIngredientType, List<String>> recipeUidMap = getRecipeUidMap(inputsArray);
 
+            Pair<IRecipeWrapper, Integer> recipePair = RecipeHelper.getRecipeWrapperAndIndex(recipeUidMap, recipeCategoryUid, resultObject, new Focus<>(mode, ingredientObject));
+
+            if (recipePair == null) {
+                JEIUtilities.logger.error("Failed to find the corresponding recipe, found the invalid recipe record :\n{}", recipeInfoString);
+                return null;
+            }
+
+            return new RecipeInfo<>(ingredientObject,
+                    resultObject,
+                    recipeCategoryUid,
+                    recipePair.getRight(),
+                    isInputMode,
+                    recipePair.getLeft()
+            );
+        }
+
+        return null;
     }
 
     private Object loadIngredientFromJson(String ingredientString, Collection<IIngredientType> otherIngredientTypes) {

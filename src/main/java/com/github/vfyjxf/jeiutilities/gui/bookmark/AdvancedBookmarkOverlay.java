@@ -4,6 +4,7 @@ import com.github.vfyjxf.jeiutilities.config.JeiUtilitiesConfig;
 import com.github.vfyjxf.jeiutilities.gui.recipe.RecipeLayoutLite;
 import com.github.vfyjxf.jeiutilities.jei.JeiUtilitiesPlugin;
 import com.github.vfyjxf.jeiutilities.jei.ingredient.RecipeInfo;
+import mezz.jei.api.ingredients.IIngredientRenderer;
 import mezz.jei.bookmarks.BookmarkList;
 import mezz.jei.gui.Focus;
 import mezz.jei.gui.GuiHelper;
@@ -12,6 +13,7 @@ import mezz.jei.gui.elements.GuiIconToggleButton;
 import mezz.jei.gui.overlay.IngredientGridWithNavigation;
 import mezz.jei.gui.overlay.bookmarks.BookmarkOverlay;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import org.lwjgl.input.Keyboard;
 
@@ -28,6 +30,7 @@ public class AdvancedBookmarkOverlay extends BookmarkOverlay {
 
     private final IngredientGridWithNavigation contents;
     private final GuiIconToggleButton recordConfigButton;
+    private final BookmarkInputHandler inputHandler;
 
     private RecipeInfo<?, ?> infoUnderMouse;
     private RecipeLayoutLite recipeLayout;
@@ -44,6 +47,7 @@ public class AdvancedBookmarkOverlay extends BookmarkOverlay {
         super(bookmarkList, guiHelper, guiScreenHelper);
         this.recordConfigButton = RecordConfigButton.create(this);
         this.contents = ObfuscationReflectionHelper.getPrivateValue(BookmarkOverlay.class, this, "contents");
+        this.inputHandler = BookmarkInputHandler.getInstance();
     }
 
     @Override
@@ -101,6 +105,13 @@ public class AdvancedBookmarkOverlay extends BookmarkOverlay {
         if (!renderRecipe) {
             super.drawTooltips(minecraft, mouseX, mouseY);
             this.recordConfigButton.drawTooltips(minecraft, mouseX, mouseY);
+        }
+        if (inputHandler.getDraggedElement() != null) {
+            GlStateManager.pushMatrix();
+            GlStateManager.translate(0.0F, 0.0F, 200.0F);
+            IIngredientRenderer ingredientRenderer = inputHandler.getDraggedElement().getIngredientRenderer();
+            ingredientRenderer.render(minecraft, mouseX, mouseY, inputHandler.getDraggedElement().getIngredient());
+            GlStateManager.popMatrix();
         }
 
     }
