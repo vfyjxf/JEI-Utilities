@@ -2,6 +2,7 @@ package com.github.vfyjxf.jeiutilities.gui.bookmark;
 
 import com.github.vfyjxf.jeiutilities.config.JeiUtilitiesConfig;
 import com.github.vfyjxf.jeiutilities.config.KeyBindings;
+import com.github.vfyjxf.jeiutilities.gui.common.GuiInputHandler;
 import com.github.vfyjxf.jeiutilities.gui.recipe.RecipeLayoutLite;
 import com.github.vfyjxf.jeiutilities.jei.ingredient.RecipeInfo;
 import mezz.jei.api.ingredients.IIngredientRenderer;
@@ -19,6 +20,8 @@ import org.lwjgl.input.Keyboard;
 import javax.annotation.Nonnull;
 import java.awt.*;
 import java.util.Set;
+
+import static com.github.vfyjxf.jeiutilities.jei.JeiUtilitiesPlugin.ingredientListOverlay;
 
 @SuppressWarnings("unused")
 public class AdvancedBookmarkOverlay extends BookmarkOverlay {
@@ -72,7 +75,7 @@ public class AdvancedBookmarkOverlay extends BookmarkOverlay {
     public void drawTooltips(@Nonnull Minecraft minecraft, int mouseX, int mouseY) {
         boolean renderRecipe = false;
         int eventKey = Keyboard.getEventKey();
-        boolean displayRecipe = KeyBindings.isKeyDown(KeyBindings.displayRecipe);
+        boolean displayRecipe = KeyBindings.isKeyDown(KeyBindings.displayRecipe, false);
         boolean isTransferRecipe = KeyBindings.isKeyDown(KeyBindings.transferRecipe);
         boolean isTransferRecipeMax = KeyBindings.isKeyDown(KeyBindings.transferRecipeMax);
         if (displayRecipe | isTransferRecipe | isTransferRecipeMax) {
@@ -97,13 +100,15 @@ public class AdvancedBookmarkOverlay extends BookmarkOverlay {
             }
         }
 
-        if (isTransferRecipe || isTransferRecipeMax) {
-            if (recipeLayout != null && recipeLayout.getTransferError() != null) {
-                if (!renderRecipe) {
-                    recipeLayout.drawRecipe(minecraft, mouseX, mouseY);
-                    renderRecipe = true;
+        if (!(GuiInputHandler.isContainerTextFieldFocused() || ingredientListOverlay.hasKeyboardFocus())) {
+            if (isTransferRecipe || isTransferRecipeMax) {
+                if (recipeLayout != null && recipeLayout.getTransferError() != null) {
+                    if (!renderRecipe) {
+                        recipeLayout.drawRecipe(minecraft, mouseX, mouseY);
+                        renderRecipe = true;
+                    }
+                    recipeLayout.showError(minecraft, mouseX, mouseY);
                 }
-                recipeLayout.showError(minecraft, mouseX, mouseY);
             }
         }
 

@@ -9,12 +9,17 @@ import it.unimi.dsi.fastutil.ints.IntArraySet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import mezz.jei.api.recipe.transfer.IRecipeTransferError;
 import mezz.jei.input.MouseHelper;
+import mezz.jei.util.ReflectionUtil;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.inventory.Container;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.lwjgl.input.Keyboard;
+
+import static com.github.vfyjxf.jeiutilities.jei.JeiUtilitiesPlugin.ingredientListOverlay;
 
 public class GuiInputHandler {
 
@@ -42,8 +47,12 @@ public class GuiInputHandler {
             pressedKeys.remove(eventKey);
         }
 
-        boolean shouldHandleKey = (eventKey == 0 && typedChar >= 32) || Keyboard.getEventKeyState();
-        if (!shouldHandleKey || pressedKeys.contains(eventKey)) {
+        boolean shouldHandleInput = (eventKey == 0 && typedChar >= 32) || Keyboard.getEventKeyState();
+        boolean shouldNotHandleKey = !shouldHandleInput ||
+                pressedKeys.contains(eventKey) ||
+                isContainerTextFieldFocused() ||
+                ingredientListOverlay.hasKeyboardFocus();
+        if (shouldNotHandleKey) {
             return;
         }
 
@@ -89,6 +98,15 @@ public class GuiInputHandler {
             }
         }
         return null;
+    }
+
+    public static boolean isContainerTextFieldFocused() {
+        GuiScreen gui = Minecraft.getMinecraft().currentScreen;
+        if (gui == null) {
+            return false;
+        }
+        GuiTextField textField = ReflectionUtil.getFieldWithClass(gui, GuiTextField.class);
+        return textField != null && textField.getVisible() && textField.isFocused();
     }
 
 }

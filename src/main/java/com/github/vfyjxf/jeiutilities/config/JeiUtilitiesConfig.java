@@ -14,6 +14,7 @@ public class JeiUtilitiesConfig {
 
     private static final String CATEGORY_HISTORY = "history";
     private static final String CATEGORY_BOOKMARK = "bookmark";
+    private static final String CATEGORY_RENDER = "render";
 
     private static Configuration config;
     private static File modConfigFile;
@@ -26,6 +27,9 @@ public class JeiUtilitiesConfig {
     private static boolean recordRecipes = true;
     private static boolean showRecipeBookmarkReminders = true;
     private static RecordMode recordMode = RecordMode.ENABLE;
+
+    private static boolean adaptiveRecipePreview = true;
+    private static float recipePreviewScaling = 0.8F;
 
 
     public static void preInit(FMLPreInitializationEvent event) {
@@ -97,7 +101,20 @@ public class JeiUtilitiesConfig {
                             + "Disable: Don't record any recipes" + "\n"
                             + "RESTRICTED: You need to hold down Shift to view the recorded recipe or record recipe."));
         }
-
+        {
+            adaptiveRecipePreview = config.getBoolean("adaptiveRecipePreview",
+                    CATEGORY_RENDER,
+                    adaptiveRecipePreview,
+                    "If true, then the recipe preview will automatically select the appropriate scaling based on the screen size."
+            );
+            recipePreviewScaling = config.getFloat("recipePreviewScaling",
+                    CATEGORY_RENDER,
+                    recipePreviewScaling,
+                    0.01F,
+                    5.0F,
+                    "The scaling of the recipe preview.It is only used when adaptiveRecipePreview is false."
+            );
+        }
 
         if (config.hasChanged()) {
             config.save();
@@ -144,6 +161,14 @@ public class JeiUtilitiesConfig {
 
     public static SplittingMode getSplittingMode() {
         return splittingMode;
+    }
+
+    public static boolean isAdaptiveRecipePreview() {
+        return adaptiveRecipePreview;
+    }
+
+    public static float getRecipePreviewScaling() {
+        return recipePreviewScaling;
     }
 
     @SubscribeEvent

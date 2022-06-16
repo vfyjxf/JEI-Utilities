@@ -9,3 +9,6 @@ jeiutilities.button.name.enable=打开配方记录
 jeiutilities.button.name.restricted=限制模式
 
 key.jeiutilities.displayRecipe=显示配方预览
+key.jeiutilities.pickBookmark=拾起书签
+key.jeiutilities.transferRecipe=转移配方（单个）
+key.jeiutilities.transferRecipeMax=转移配方（最大）

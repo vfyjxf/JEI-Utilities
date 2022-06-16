@@ -83,7 +83,7 @@ repositories {
     }
     maven {
         name = "CurseMaven"
-        url = "https://www.cursemaven.com"
+        url = "https://cursemaven.com"
     }
     maven {
         url "https://maven.cleanroommc.com"
@@ -92,6 +92,9 @@ repositories {
 
 dependencies {
     deobfCompile "mezz.jei:jei_${mc_version}:${jei_version}"
+    //big recipe test
+//    runtime "curse.maven:extended-crafting-268387:2777071"
+//    runtime "curse.maven:cucumber-272335:2645867"
 //    deobfCompile("zone.rong:mixinbooter:4.2")
 }
 

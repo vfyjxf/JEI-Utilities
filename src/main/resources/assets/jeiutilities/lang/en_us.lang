@@ -9,3 +9,6 @@ jeiutilities.button.name.enable=Enable
 jeiutilities.button.name.restricted=Restricted
 
 key.jeiutilities.displayRecipe=Display Recipe Preview
+key.jeiutilities.pickBookmark=Pick up bookmark
+key.jeiutilities.transferRecipe=Transfer Recipe(Single)
+key.jeiutilities.transferRecipeMax=Transfer Recipe(MAX)

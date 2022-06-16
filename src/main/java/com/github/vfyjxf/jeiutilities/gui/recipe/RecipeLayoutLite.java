@@ -1,5 +1,6 @@
 package com.github.vfyjxf.jeiutilities.gui.recipe;
 
+import com.github.vfyjxf.jeiutilities.config.JeiUtilitiesConfig;
 import com.github.vfyjxf.jeiutilities.jei.JeiUtilitiesPlugin;
 import com.github.vfyjxf.jeiutilities.jei.ingredient.RecipeInfo;
 import mezz.jei.Internal;
@@ -28,6 +29,7 @@ import mezz.jei.transfer.RecipeTransferErrorInternal;
 import mezz.jei.util.ErrorUtil;
 import mezz.jei.util.Log;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
@@ -39,6 +41,8 @@ import javax.annotation.Nullable;
 import java.awt.*;
 import java.util.IdentityHashMap;
 import java.util.Map;
+
+import static com.github.vfyjxf.jeiutilities.config.JeiUtilitiesConfig.isAdaptiveRecipePreview;
 
 /**
  * A lite version of {@link RecipeLayout}, used to display recipes in the bookmark area.
@@ -161,8 +165,10 @@ public class RecipeLayoutLite implements IRecipeLayoutDrawable {
         GlStateManager.enableAlpha();
         final int recipeMouseX = mouseX - posX;
         final int recipeMouseY = mouseY - posY;
+        final float scaling = isAdaptiveRecipePreview() ? getScaling(minecraft.currentScreen) : JeiUtilitiesConfig.getRecipePreviewScaling();
         GlStateManager.pushMatrix();
-        GlStateManager.translate(posX, posY, 0.0F);
+        GlStateManager.translate(posX * scaling, posY * scaling, 0.0F);
+        GlStateManager.scale(scaling, scaling, 1.0F);
         {
             IDrawable categoryBackground = recipeCategory.getBackground();
             int width = categoryBackground.getWidth() + (2 * RECIPE_BORDER_PADDING);
@@ -182,6 +188,7 @@ public class RecipeLayoutLite implements IRecipeLayoutDrawable {
 
         GlStateManager.pushMatrix();
         GlStateManager.translate(0.0F, 0.0F, 200.0F);
+        GlStateManager.scale(scaling, scaling, 1.0F);
         for (GuiIngredientGroup<?> guiIngredientGroup : guiIngredientGroups.values()) {
             guiIngredientGroup.draw(minecraft, posX, posY, highlightColor, mouseX, mouseY);
         }
@@ -190,6 +197,31 @@ public class RecipeLayoutLite implements IRecipeLayoutDrawable {
         GlStateManager.disableBlend();
         GlStateManager.disableLighting();
         GlStateManager.disableAlpha();
+    }
+
+    private float getScaling(GuiScreen guiScreen) {
+        if (guiScreen != null) {
+            IDrawable categoryBackground = recipeCategory.getBackground();
+            int backgroundWidth = categoryBackground.getWidth() + (2 * RECIPE_BORDER_PADDING);
+            int backgroundHeight = categoryBackground.getHeight() + (2 * RECIPE_BORDER_PADDING);
+            int maxWidth = guiScreen.width / 2;
+            int maxHeight = guiScreen.height / 2;
+            //when backgroundWidth > maxWidth and backgroundHeight > maxHeight,Scaling by width.
+            if (backgroundWidth > maxWidth && backgroundHeight > maxHeight) {
+                return (float) maxWidth / backgroundWidth + 0.1F;
+            }
+            if (backgroundWidth < maxWidth * 0.5 && backgroundHeight < maxHeight * 0.5) {
+                return (float) maxWidth / backgroundWidth - 0.2F;
+            }
+            if (backgroundWidth < maxWidth && backgroundHeight > maxHeight) {
+                return (float) maxHeight / backgroundHeight + 0.2F;
+            }
+            if (backgroundWidth >= maxWidth && backgroundHeight < maxHeight) {
+                return 1.0F;
+            }
+            return 0.95F;
+        }
+        return JeiUtilitiesConfig.getRecipePreviewScaling();
     }
 
     @Override

@@ -15,17 +15,20 @@ import javax.annotation.Nonnull;
 public final class KeyBindings {
 
     public static final KeyBinding displayRecipe;
+    public static final KeyBinding pickBookmark;
     public static final KeyBinding transferRecipe;
     public static final KeyBinding transferRecipeMax;
 
     static {
         displayRecipe = new KeyBinding("key.jeiutilities.displayRecipe", KeyConflictContext.GUI, Keyboard.KEY_LCONTROL, JEIUtilities.NAME);
+        pickBookmark = new KeyBinding("key.jeiutilities.pickBookmark", KeyConflictContext.GUI, -98, JEIUtilities.NAME);
         transferRecipe = new KeyBinding("key.jeiutilities.transferRecipe", KeyConflictContext.GUI, KeyModifier.CONTROL, Keyboard.KEY_W, JEIUtilities.NAME);
         transferRecipeMax = new KeyBinding("key.jeiutilities.transferRecipeMax", KeyConflictContext.GUI, KeyModifier.CONTROL, Keyboard.KEY_T, JEIUtilities.NAME);
     }
 
     public static void registerKeyBindings() {
         ClientRegistry.registerKeyBinding(displayRecipe);
+        ClientRegistry.registerKeyBinding(pickBookmark);
         ClientRegistry.registerKeyBinding(transferRecipe);
         ClientRegistry.registerKeyBinding(transferRecipeMax);
     }
@@ -48,7 +51,7 @@ public final class KeyBindings {
     }
 
     public static boolean isKeyDown(@Nonnull KeyBinding keyBinding) {
-        return isKeyDown(keyBinding, false);
+        return isKeyDown(keyBinding, true);
     }
 
 }

@@ -41,6 +41,7 @@ public class JeiUtilitiesPlugin implements IModPlugin {
     public static IGuiHelper guiHelper;
     public static BookmarkOverlay bookmarkOverlay;
     public static BookmarkList bookmarkList;
+    public static IngredientListOverlay ingredientListOverlay;
     public static IngredientGrid bookmarkIngredientGrid;
     public static IngredientGridWithNavigation bookmarkContents;
     /**
@@ -52,6 +53,7 @@ public class JeiUtilitiesPlugin implements IModPlugin {
     @Override
     public void onRuntimeAvailable(@Nonnull IJeiRuntime jeiRuntime) {
         JeiUtilitiesPlugin.jeiRuntime = Internal.getRuntime();
+        ingredientListOverlay = (IngredientListOverlay) jeiRuntime.getIngredientListOverlay();
         if (JeiUtilitiesConfig.isEnableHistory()) {
             ObfuscationReflectionHelper.setPrivateValue(
                     IngredientGridWithNavigation.class,
