@@ -134,7 +134,7 @@ public class BookmarkInputHandler {
     }
 
     /**
-     * open recorded recipe
+     * open recorded recipe and handle bookmarks movement(Replace jei InputHandler).
      */
     @SubscribeEvent(priority = EventPriority.HIGH)
     public void onMouseClicked(GuiScreenEvent.MouseInputEvent.Pre event) {
@@ -171,7 +171,7 @@ public class BookmarkInputHandler {
     }
 
     /**
-     * open recorded recipe
+     * open recorded recipe(Replace jei InputHandler)
      */
     @SubscribeEvent(priority = EventPriority.HIGH)
     public void onKeyPressed(GuiScreenEvent.KeyboardInputEvent.Post event) {

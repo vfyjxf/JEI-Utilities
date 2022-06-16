@@ -1,6 +1,7 @@
 package com.github.vfyjxf.jeiutilities.jei;
 
 import com.github.vfyjxf.jeiutilities.config.JeiUtilitiesConfig;
+import com.github.vfyjxf.jeiutilities.gui.bookmark.AdvancedBookmarkOverlay;
 import com.github.vfyjxf.jeiutilities.gui.history.AdvancedIngredientGrid;
 import com.github.vfyjxf.jeiutilities.jei.ingredient.CraftingRecipeInfo;
 import com.github.vfyjxf.jeiutilities.jei.ingredient.RecipeInfo;

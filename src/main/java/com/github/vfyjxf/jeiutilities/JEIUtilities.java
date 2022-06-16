@@ -2,6 +2,7 @@ package com.github.vfyjxf.jeiutilities;
 
 import com.github.vfyjxf.jeiutilities.config.JeiUtilitiesConfig;
 import com.github.vfyjxf.jeiutilities.config.KeyBindings;
+import com.github.vfyjxf.jeiutilities.gui.common.GuiInputHandler;
 import com.github.vfyjxf.jeiutilities.gui.bookmark.BookmarkInputHandler;
 import com.github.vfyjxf.jeiutilities.jei.JeiUtilitiesPlugin;
 import mezz.jei.Internal;
@@ -42,6 +43,7 @@ public class JEIUtilities {
         if (JeiUtilitiesConfig.getRecordRecipes()) {
             MinecraftForge.EVENT_BUS.register(BookmarkInputHandler.getInstance());
         }
+        MinecraftForge.EVENT_BUS.register(GuiInputHandler.getInstance());
         KeyBindings.registerKeyBindings();
     }
 

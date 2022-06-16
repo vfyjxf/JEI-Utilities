@@ -9,6 +9,8 @@ import mezz.jei.api.recipe.IFocus;
 import mezz.jei.api.recipe.IIngredientType;
 import mezz.jei.api.recipe.IRecipeCategory;
 import mezz.jei.api.recipe.IRecipeWrapper;
+import mezz.jei.api.recipe.transfer.IRecipeTransferError;
+import mezz.jei.api.recipe.transfer.IRecipeTransferHandler;
 import mezz.jei.gui.Focus;
 import mezz.jei.gui.elements.DrawableNineSliceTexture;
 import mezz.jei.gui.ingredients.GuiFluidStackGroup;
@@ -18,10 +20,15 @@ import mezz.jei.gui.ingredients.GuiItemStackGroup;
 import mezz.jei.gui.recipes.RecipeLayout;
 import mezz.jei.gui.recipes.ShapelessIcon;
 import mezz.jei.ingredients.Ingredients;
+import mezz.jei.recipes.RecipeRegistry;
+import mezz.jei.runtime.JeiRuntime;
+import mezz.jei.transfer.RecipeTransferErrorInternal;
 import mezz.jei.util.ErrorUtil;
 import mezz.jei.util.Log;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.Container;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fluids.FluidStack;
 
@@ -48,6 +55,9 @@ public class RecipeLayoutLite implements IRecipeLayoutDrawable {
     private final Color highlightColor = new Color(0x7FFFFFFF, true);
     @Nullable
     private ShapelessIcon shapelessIcon;
+
+    private IRecipeTransferError transferError;
+
     private final DrawableNineSliceTexture recipeBorder;
     private int posX;
     private int posY;
@@ -194,6 +204,38 @@ public class RecipeLayoutLite implements IRecipeLayoutDrawable {
         drawRecipe(minecraft, mouseX, mouseY);
         drawOverlays(minecraft, mouseX, mouseY);
     }
+
+    public IRecipeTransferError getTransferError() {
+        return transferError;
+    }
+
+    @SuppressWarnings("rawtypes")
+    public IRecipeTransferError transferRecipe(Container container, EntityPlayer player, boolean maxTransfer, boolean doTransfer) {
+        final JeiRuntime runtime = Internal.getRuntime();
+        if (runtime == null) {
+            return RecipeTransferErrorInternal.INSTANCE;
+        }
+        final RecipeRegistry recipeRegistry = runtime.getRecipeRegistry();
+
+        final IRecipeTransferHandler transferHandler = recipeRegistry.getRecipeTransferHandler(container, this.recipeCategory);
+        if (transferHandler == null) {
+            if (doTransfer) {
+                Log.get().error("No Recipe Transfer handler for container {}", container.getClass());
+            }
+            return RecipeTransferErrorInternal.INSTANCE;
+        }
+
+        //noinspection unchecked
+        transferError = transferHandler.transferRecipe(container, this, player, maxTransfer, doTransfer);
+        return transferError;
+    }
+
+    public void showError(Minecraft minecraft, int mouseX, int mouseY) {
+        if (transferError != null) {
+            transferError.showError(minecraft, mouseX, mouseY, this, posX, posY);
+        }
+    }
+
 
     @Nonnull
     @Override

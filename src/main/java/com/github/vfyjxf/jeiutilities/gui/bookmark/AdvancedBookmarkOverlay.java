@@ -1,6 +1,7 @@
 package com.github.vfyjxf.jeiutilities.gui.bookmark;
 
 import com.github.vfyjxf.jeiutilities.config.JeiUtilitiesConfig;
+import com.github.vfyjxf.jeiutilities.config.KeyBindings;
 import com.github.vfyjxf.jeiutilities.gui.recipe.RecipeLayoutLite;
 import com.github.vfyjxf.jeiutilities.jei.JeiUtilitiesPlugin;
 import com.github.vfyjxf.jeiutilities.jei.ingredient.RecipeInfo;
@@ -20,8 +21,6 @@ import org.lwjgl.input.Keyboard;
 import javax.annotation.Nonnull;
 import java.awt.*;
 import java.util.Set;
-
-import static com.github.vfyjxf.jeiutilities.config.KeyBindings.displayRecipe;
 
 @SuppressWarnings("unused")
 public class AdvancedBookmarkOverlay extends BookmarkOverlay {
@@ -74,8 +73,11 @@ public class AdvancedBookmarkOverlay extends BookmarkOverlay {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public void drawTooltips(@Nonnull Minecraft minecraft, int mouseX, int mouseY) {
         boolean renderRecipe = false;
-
-        if (Keyboard.isKeyDown(displayRecipe.getKeyCode())) {
+        int eventKey = Keyboard.getEventKey();
+        boolean displayRecipe = KeyBindings.isKeyDown(KeyBindings.displayRecipe);
+        boolean isTransferRecipe = KeyBindings.isKeyDown(KeyBindings.transferRecipe);
+        boolean isTransferRecipeMax = KeyBindings.isKeyDown(KeyBindings.transferRecipeMax);
+        if (displayRecipe | isTransferRecipe | isTransferRecipeMax) {
             Object ingredientUnderMouse = this.getIngredientUnderMouse();
             if (ingredientUnderMouse instanceof RecipeInfo) {
                 RecipeInfo recipeInfo = (RecipeInfo) ingredientUnderMouse;
@@ -94,7 +96,7 @@ public class AdvancedBookmarkOverlay extends BookmarkOverlay {
                     this.recipeLayout = recipeLayout;
                 }
 
-                if (recipeLayout != null) {
+                if (recipeLayout != null && displayRecipe) {
                     recipeLayout.drawRecipe(minecraft, mouseX, mouseY);
                     renderRecipe = true;
                 }
@@ -102,10 +104,21 @@ public class AdvancedBookmarkOverlay extends BookmarkOverlay {
             }
         }
 
+        if (isTransferRecipe || isTransferRecipeMax) {
+            if (recipeLayout != null && recipeLayout.getTransferError() != null) {
+                if (!renderRecipe) {
+                    recipeLayout.drawRecipe(minecraft, mouseX, mouseY);
+                    renderRecipe = true;
+                }
+                recipeLayout.showError(minecraft, mouseX, mouseY);
+            }
+        }
+
         if (!renderRecipe) {
             super.drawTooltips(minecraft, mouseX, mouseY);
             this.recordConfigButton.drawTooltips(minecraft, mouseX, mouseY);
         }
+
         if (inputHandler.getDraggedElement() != null) {
             GlStateManager.pushMatrix();
             GlStateManager.translate(0.0F, 0.0F, 200.0F);
@@ -126,4 +139,9 @@ public class AdvancedBookmarkOverlay extends BookmarkOverlay {
 
         return result;
     }
+
+    public RecipeLayoutLite getRecipeLayout() {
+        return recipeLayout;
+    }
+
 }
