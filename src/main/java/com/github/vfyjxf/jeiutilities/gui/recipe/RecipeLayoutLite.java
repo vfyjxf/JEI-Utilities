@@ -1,5 +1,7 @@
 package com.github.vfyjxf.jeiutilities.gui.recipe;
 
+import com.github.vfyjxf.jeiutilities.jei.JeiUtilitiesPlugin;
+import com.github.vfyjxf.jeiutilities.jei.ingredient.RecipeInfo;
 import mezz.jei.Internal;
 import mezz.jei.api.gui.*;
 import mezz.jei.api.ingredients.IIngredientRegistry;
@@ -81,6 +83,15 @@ public class RecipeLayoutLite implements IRecipeLayoutDrawable {
             Log.get().error("Error caught from Recipe Category: {}", recipeCategory.getClass().getCanonicalName(), e);
         }
         return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static RecipeLayoutLite createLayout(RecipeInfo<?, ?> recipeInfo, int posX, int posY) {
+        return create(JeiUtilitiesPlugin.recipeRegistry.getRecipeCategory(recipeInfo.getRecipeCategoryUid()),
+                recipeInfo.getRecipeWrapper(),
+                new Focus<>(recipeInfo.getMode(),
+                        recipeInfo.getIngredient()),
+                posX, posY);
     }
 
     private <T extends IRecipeWrapper> RecipeLayoutLite(IRecipeCategory<T> recipeCategory, T recipeWrapper, @Nullable IFocus<?> focus, int posX, int posY) {

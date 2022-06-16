@@ -3,11 +3,9 @@ package com.github.vfyjxf.jeiutilities.gui.bookmark;
 import com.github.vfyjxf.jeiutilities.config.JeiUtilitiesConfig;
 import com.github.vfyjxf.jeiutilities.config.KeyBindings;
 import com.github.vfyjxf.jeiutilities.gui.recipe.RecipeLayoutLite;
-import com.github.vfyjxf.jeiutilities.jei.JeiUtilitiesPlugin;
 import com.github.vfyjxf.jeiutilities.jei.ingredient.RecipeInfo;
 import mezz.jei.api.ingredients.IIngredientRenderer;
 import mezz.jei.bookmarks.BookmarkList;
-import mezz.jei.gui.Focus;
 import mezz.jei.gui.GuiHelper;
 import mezz.jei.gui.GuiScreenHelper;
 import mezz.jei.gui.elements.GuiIconToggleButton;
@@ -87,12 +85,7 @@ public class AdvancedBookmarkOverlay extends BookmarkOverlay {
                 } else {
                     this.infoUnderMouse = recipeInfo;
 
-                    recipeLayout = RecipeLayoutLite.create(
-                            JeiUtilitiesPlugin.recipeRegistry.getRecipeCategory(recipeInfo.getRecipeCategoryUid()),
-                            recipeInfo.getRecipeWrapper(),
-                            new Focus<>(recipeInfo.getMode(),
-                                    recipeInfo.getIngredient()),
-                            mouseX, mouseY);
+                    recipeLayout = RecipeLayoutLite.createLayout(recipeInfo, mouseX, mouseY);
                     this.recipeLayout = recipeLayout;
                 }
 
@@ -140,8 +133,20 @@ public class AdvancedBookmarkOverlay extends BookmarkOverlay {
         return result;
     }
 
+    public RecipeInfo<?, ?> getInfoUnderMouse() {
+        return infoUnderMouse;
+    }
+
     public RecipeLayoutLite getRecipeLayout() {
         return recipeLayout;
+    }
+
+    public void setInfoUnderMouse(RecipeInfo<?, ?> infoUnderMouse) {
+        this.infoUnderMouse = infoUnderMouse;
+    }
+
+    public void setRecipeLayout(RecipeLayoutLite recipeLayout) {
+        this.recipeLayout = recipeLayout;
     }
 
 }

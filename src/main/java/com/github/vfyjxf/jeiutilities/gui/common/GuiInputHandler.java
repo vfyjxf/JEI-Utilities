@@ -4,9 +4,11 @@ import com.github.vfyjxf.jeiutilities.config.KeyBindings;
 import com.github.vfyjxf.jeiutilities.gui.bookmark.AdvancedBookmarkOverlay;
 import com.github.vfyjxf.jeiutilities.gui.recipe.RecipeLayoutLite;
 import com.github.vfyjxf.jeiutilities.jei.JeiUtilitiesPlugin;
+import com.github.vfyjxf.jeiutilities.jei.ingredient.RecipeInfo;
 import it.unimi.dsi.fastutil.ints.IntArraySet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import mezz.jei.api.recipe.transfer.IRecipeTransferError;
+import mezz.jei.input.MouseHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.inventory.Container;
@@ -69,7 +71,22 @@ public class GuiInputHandler {
 
     private RecipeLayoutLite getRecipeLayout() {
         if (JeiUtilitiesPlugin.bookmarkOverlay instanceof AdvancedBookmarkOverlay) {
-            return ((AdvancedBookmarkOverlay) JeiUtilitiesPlugin.bookmarkOverlay).getRecipeLayout();
+            AdvancedBookmarkOverlay bookmarkOverlay = (AdvancedBookmarkOverlay) JeiUtilitiesPlugin.bookmarkOverlay;
+            Object ingredient = bookmarkOverlay.getIngredientUnderMouse();
+            if (ingredient instanceof RecipeInfo) {
+                RecipeInfo<?, ?> recipeInfo = (RecipeInfo<?, ?>) ingredient;
+                if (recipeInfo == bookmarkOverlay.getInfoUnderMouse()) {
+                    return bookmarkOverlay.getRecipeLayout();
+                } else {
+                    RecipeLayoutLite recipeLayout = RecipeLayoutLite.createLayout(recipeInfo, MouseHelper.getX(), MouseHelper.getY());
+                    if (recipeLayout != null) {
+                        bookmarkOverlay.setRecipeLayout(recipeLayout);
+                        bookmarkOverlay.setInfoUnderMouse(recipeInfo);
+                        return recipeLayout;
+                    }
+                }
+
+            }
         }
         return null;
     }
