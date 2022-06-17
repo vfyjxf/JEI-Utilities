@@ -139,10 +139,6 @@ public class BookmarkInputHandler {
     @SubscribeEvent(priority = EventPriority.HIGH)
     public void onMouseClicked(GuiScreenEvent.MouseInputEvent.Pre event) {
 
-        if (JeiUtilitiesConfig.getRecordMode() == RecordMode.DISABLE) {
-            return;
-        }
-
         final int eventButton = Mouse.getEventButton();
 
         if (eventButton > -1) {
@@ -175,10 +171,6 @@ public class BookmarkInputHandler {
      */
     @SubscribeEvent(priority = EventPriority.HIGH)
     public void onKeyPressed(GuiScreenEvent.KeyboardInputEvent.Post event) {
-
-        if (JeiUtilitiesConfig.getRecordMode() == RecordMode.DISABLE) {
-            return;
-        }
 
         char typedChar = Keyboard.getEventCharacter();
         int eventKey = Keyboard.getEventKey();
@@ -218,6 +210,11 @@ public class BookmarkInputHandler {
                 RecipeInfo<?, ?> recipeInfo = (RecipeInfo<?, ?>) ingredient;
 
                 if (mouseButton == 0) {
+
+                    if (JeiUtilitiesConfig.getRecordMode() == RecordMode.DISABLE) {
+                        recipesGui.show(new Focus<>(IFocus.Mode.OUTPUT, recipeInfo.getResult()));
+                        return true;
+                    }
 
                     //Use to invert the operation when shift is pressed.
                     if (handleInvert(recipeInfo)) {
@@ -259,6 +256,11 @@ public class BookmarkInputHandler {
                     RecipeInfo<?, ?> recipeInfo = (RecipeInfo<?, ?>) clickedIngredient;
 
                     if (showRecipe) {
+
+                        if (JeiUtilitiesConfig.getRecordMode() == RecordMode.DISABLE) {
+                            recipesGui.show(new Focus<>(IFocus.Mode.OUTPUT, recipeInfo.getResult()));
+                            return true;
+                        }
 
                         if (handleInvert(recipeInfo)) {
                             return true;

@@ -165,14 +165,14 @@ public class RecipeLayoutLite implements IRecipeLayoutDrawable {
         GlStateManager.enableAlpha();
         final int recipeMouseX = mouseX - posX;
         final int recipeMouseY = mouseY - posY;
+        int width = background.getWidth() + (2 * RECIPE_BORDER_PADDING);
+        int height = background.getHeight() + (2 * RECIPE_BORDER_PADDING);
+        checkBounds(minecraft.currentScreen, height);
         final float scaling = isAdaptiveRecipePreview() ? getScaling(minecraft.currentScreen) : JeiUtilitiesConfig.getRecipePreviewScaling();
         GlStateManager.pushMatrix();
         GlStateManager.translate(posX * scaling, posY * scaling, 0.0F);
         GlStateManager.scale(scaling, scaling, 1.0F);
         {
-            IDrawable categoryBackground = recipeCategory.getBackground();
-            int width = categoryBackground.getWidth() + (2 * RECIPE_BORDER_PADDING);
-            int height = categoryBackground.getHeight() + (2 * RECIPE_BORDER_PADDING);
             recipeBorder.draw(minecraft, -RECIPE_BORDER_PADDING, -RECIPE_BORDER_PADDING, width, height);
             background.draw(minecraft);
             recipeCategory.drawExtras(minecraft);
@@ -222,6 +222,20 @@ public class RecipeLayoutLite implements IRecipeLayoutDrawable {
             return 0.95F;
         }
         return JeiUtilitiesConfig.getRecipePreviewScaling();
+    }
+
+    private void checkBounds(GuiScreen guiScreen, int height) {
+        if (guiScreen != null) {
+            if (posX < 6) {
+                posX += 6;
+            }
+            if (posY < 6) {
+                posY += 6;
+            }
+            if (posY + height > guiScreen.height) {
+                posY -= posY + height - guiScreen.height;
+            }
+        }
     }
 
     @Override
@@ -275,7 +289,11 @@ public class RecipeLayoutLite implements IRecipeLayoutDrawable {
 
     public void showError(Minecraft minecraft, int mouseX, int mouseY) {
         if (transferError != null) {
+            final float scaling = isAdaptiveRecipePreview() ? getScaling(minecraft.currentScreen) : JeiUtilitiesConfig.getRecipePreviewScaling();
+            GlStateManager.pushMatrix();
+            GlStateManager.scale(scaling, scaling, 1.0F);
             transferError.showError(minecraft, mouseX, mouseY, this, posX, posY);
+            GlStateManager.popMatrix();
         }
     }
 
@@ -337,6 +355,14 @@ public class RecipeLayoutLite implements IRecipeLayoutDrawable {
     @Override
     public IRecipeCategory<?> getRecipeCategory() {
         return recipeCategory;
+    }
+
+    public int getPosX() {
+        return posX;
+    }
+
+    public int getPosY() {
+        return posY;
     }
 
     @Override

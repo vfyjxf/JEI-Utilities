@@ -22,6 +22,8 @@ import java.awt.*;
 import java.util.Set;
 
 import static com.github.vfyjxf.jeiutilities.jei.JeiUtilitiesPlugin.ingredientListOverlay;
+import static mezz.jei.gui.overlay.IngredientGrid.INGREDIENT_HEIGHT;
+import static mezz.jei.gui.overlay.IngredientGrid.INGREDIENT_WIDTH;
 
 @SuppressWarnings("unused")
 public class AdvancedBookmarkOverlay extends BookmarkOverlay {
@@ -74,6 +76,7 @@ public class AdvancedBookmarkOverlay extends BookmarkOverlay {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public void drawTooltips(@Nonnull Minecraft minecraft, int mouseX, int mouseY) {
         boolean renderRecipe = false;
+        boolean shouldRenderRecipe = false;
         int eventKey = Keyboard.getEventKey();
         boolean displayRecipe = KeyBindings.isKeyDown(KeyBindings.displayRecipe, false);
         boolean isTransferRecipe = KeyBindings.isKeyDown(KeyBindings.transferRecipe);
@@ -82,6 +85,7 @@ public class AdvancedBookmarkOverlay extends BookmarkOverlay {
             Object ingredientUnderMouse = this.getIngredientUnderMouse();
             if (ingredientUnderMouse instanceof RecipeInfo) {
                 RecipeInfo recipeInfo = (RecipeInfo) ingredientUnderMouse;
+                shouldRenderRecipe = true;
                 RecipeLayoutLite recipeLayout;
                 if (this.infoUnderMouse == recipeInfo) {
                     recipeLayout = this.recipeLayout;
@@ -93,6 +97,7 @@ public class AdvancedBookmarkOverlay extends BookmarkOverlay {
                 }
 
                 if (recipeLayout != null && displayRecipe) {
+                    updatePosition(mouseX, mouseY);
                     recipeLayout.drawRecipe(minecraft, mouseX, mouseY);
                     renderRecipe = true;
                 }
@@ -102,7 +107,7 @@ public class AdvancedBookmarkOverlay extends BookmarkOverlay {
 
         if (!(GuiInputHandler.isContainerTextFieldFocused() || ingredientListOverlay.hasKeyboardFocus())) {
             if (isTransferRecipe || isTransferRecipeMax) {
-                if (recipeLayout != null && recipeLayout.getTransferError() != null) {
+                if (shouldRenderRecipe && recipeLayout != null && recipeLayout.getTransferError() != null) {
                     if (!renderRecipe) {
                         recipeLayout.drawRecipe(minecraft, mouseX, mouseY);
                         renderRecipe = true;
@@ -125,6 +130,17 @@ public class AdvancedBookmarkOverlay extends BookmarkOverlay {
             GlStateManager.popMatrix();
         }
 
+    }
+
+    private void updatePosition(int mouseX, int mouseY) {
+        if (this.recipeLayout != null) {
+            int x = this.recipeLayout.getPosX();
+            int y = this.recipeLayout.getPosY();
+            Rectangle area = new Rectangle(x - INGREDIENT_WIDTH, y - INGREDIENT_WIDTH, INGREDIENT_WIDTH * 2, INGREDIENT_HEIGHT * 2);
+            if (!area.contains(mouseX, mouseY)) {
+                this.recipeLayout.setPosition(mouseX, mouseY);
+            }
+        }
     }
 
     @Override
