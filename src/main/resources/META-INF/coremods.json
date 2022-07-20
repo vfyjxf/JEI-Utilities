@@ -1,0 +1,4 @@
+{
+  "jeiutilities-constructor-redirect": "jeiutilities/coremods/constructor_redirect.js",
+  "jeiutilities-method-jumper": "jeiutilities/coremods/method_jumper.js"
+}

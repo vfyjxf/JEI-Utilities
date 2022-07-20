@@ -1,0 +1,14 @@
+{  "key.jeiutilities.category": "JeiUtilities",
+  "key.jeiutilities.displayPreview": "显示配方预览",
+  "key.jeiutilities.transferRecipe": "转移配方(单个)",
+  "key.jeiutilities.transferRecipeMax": "转移配方(最大)",
+  "jeiutilities.tooltip.recording": "配方记录配置",
+  "jeiutilities.tooltip.recording.mode": "当前模式： %s",
+  "jeiutilities.tooltip.recording.description.restricted": "按住Shift键时标记配方/打开记录的配方。",
+  "jeiutilities.tooltip.recording.description.enable": "按下Shift键时不会记录配方/打开记录的配方。",
+  "jeiutilities.tooltip.recording.information_1": "按住%s键来显示配方预览。",
+  "jeiutilities.button.name.disable": "关闭配方记录",
+  "jeiutilities.button.name.enable": "开启配方记录",
+  "jeiutilities.button.name.restricted": "限制模式"
+
+}

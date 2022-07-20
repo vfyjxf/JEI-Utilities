@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "minVersion": "0.8.2",
+  "package": "com.github.vfyjxf.jeiutilities.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "client": [
+    "accessor.RecipeGuiLogicAccessor",
+    "accessor.RecipeManagerAccessor",
+    "accessor.RecipeManagerInternalAccessor",
+    "accessor.RecipesGuiAccessor",
+    "accessor.BookmarkOverlayAccessor",
+    "accessor.IngredientGridAccessor"
+  ]
+}
