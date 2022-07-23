@@ -9,6 +9,8 @@
     "accessor.RecipeManagerInternalAccessor",
     "accessor.RecipesGuiAccessor",
     "accessor.BookmarkOverlayAccessor",
-    "accessor.IngredientGridAccessor"
+    "accessor.IngredientGridAccessor",
+    "accessor.RecipeLayoutBuilderAccessor",
+    "accessor.RecipeLayoutAccessor"
   ]
 }

@@ -3,6 +3,7 @@ package com.github.vfyjxf.jeiutilities.jei.recipe;
 import mezz.jei.api.ingredients.IIngredientHelper;
 import mezz.jei.api.ingredients.IIngredientRenderer;
 import mezz.jei.api.recipe.IFocus;
+import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
@@ -22,6 +23,11 @@ public interface IRecipeInfo<R, T, V> {
      */
     @NotNull
     IRecipeCategory<R> getRecipeCategory();
+
+    /**
+     * @return The recipe.
+     */
+    R getRecipe();
 
     /**
      * @return The register name of the recipe, which we will normally use to query the recipe.
@@ -51,6 +57,12 @@ public interface IRecipeInfo<R, T, V> {
     @NotNull
     List<IFocus<V>> getFocuses();
 
+    /**
+     *
+     * @return The IFocusGroup through which the recipe was queried.
+     */
+    IFocusGroup getFocusGroup();
+
     boolean isInput();
 
     /**
@@ -71,6 +83,8 @@ public interface IRecipeInfo<R, T, V> {
      * @return A copy of the RecipeInfo.
      */
     IRecipeInfo copy();
+
+    IRecipeInfo normalizeIngredient();
 
     /**
      *

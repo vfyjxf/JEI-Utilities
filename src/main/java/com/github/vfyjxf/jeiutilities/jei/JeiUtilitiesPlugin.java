@@ -13,6 +13,7 @@ import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.helpers.IJeiHelpers;
+import mezz.jei.api.helpers.IModIdHelper;
 import mezz.jei.api.recipe.IFocusFactory;
 import mezz.jei.api.recipe.IRecipeManager;
 import mezz.jei.api.registration.IModIngredientRegistration;
@@ -37,6 +38,7 @@ public class JeiUtilitiesPlugin implements IModPlugin {
     public static IIngredientManager ingredientManager;
     public static IJeiHelpers jeiHelpers;
     public static IGuiHelper guiHelper;
+    public static IModIdHelper modIdHelper;
     public static IFocusFactory focusFactory;
     public static IRecipeGuiLogic logic;
     public static RegisteredIngredients registeredIngredients;
@@ -78,6 +80,7 @@ public class JeiUtilitiesPlugin implements IModPlugin {
         JeiUtilitiesPlugin.focusFactory = jeiHelpers.getFocusFactory();
         JeiUtilitiesPlugin.ingredientManager = ingredientManager;
         JeiUtilitiesPlugin.guiHelper = jeiHelpers.getGuiHelper();
+        JeiUtilitiesPlugin.modIdHelper = jeiHelpers.getModIdHelper();
     }
 
 }

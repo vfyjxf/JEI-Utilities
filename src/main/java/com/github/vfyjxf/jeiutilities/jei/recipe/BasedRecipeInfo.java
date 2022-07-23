@@ -1,13 +1,16 @@
 package com.github.vfyjxf.jeiutilities.jei.recipe;
 
+import com.github.vfyjxf.jeiutilities.config.JeiUtilitiesConfig;
 import com.github.vfyjxf.jeiutilities.helper.IngredientHelper;
 import mezz.jei.api.ingredients.IIngredientHelper;
 import mezz.jei.api.ingredients.IIngredientRenderer;
 import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.ingredients.subtypes.UidContext;
 import mezz.jei.api.recipe.IFocus;
+import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.category.IRecipeCategory;
+import mezz.jei.recipes.FocusGroup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -25,6 +28,7 @@ import static com.github.vfyjxf.jeiutilities.jei.bookmark.RecipeBookmarkConfig.M
 public abstract class BasedRecipeInfo<R, T, V> implements IRecipeInfo<R, T, V> {
 
     protected final IRecipeCategory<R> recipeCategory;
+    protected final R recipe;
     protected final T recipeOutput;
     protected final V focusValue;
     protected final boolean isInput;
@@ -43,31 +47,38 @@ public abstract class BasedRecipeInfo<R, T, V> implements IRecipeInfo<R, T, V> {
     ) {
         ResourceLocation registerName = recipeCategory.getRegistryName(recipe);
         if (registerName != null) {
-            return new NamedRecipeInfo<>(recipeCategory, recipeOutput, focusValue, isInput, recipeIndex, registerName);
+            return new NamedRecipeInfo<>(recipeCategory, recipe, recipeOutput, focusValue, isInput, recipeIndex, registerName);
         } else {
-            return new UnnamedRecipeInfo<>(recipeCategory, recipeOutput, focusValue, isInput, recipeIndex);
+            return new UnnamedRecipeInfo<>(recipeCategory, recipe, recipeOutput, focusValue, isInput, recipeIndex);
         }
     }
 
     public BasedRecipeInfo(
             IRecipeCategory<R> recipeCategory,
+            R recipe,
             T recipeOutput,
             V focusValue,
             boolean isInput,
             int recipeIndex
     ) {
         this.recipeCategory = recipeCategory;
-        this.recipeOutput = recipeOutput;
-        this.focusValue = focusValue;
-        this.isInput = isInput;
-        this.index = recipeIndex;
         this.ingredientHelper = ingredientManager.getIngredientHelper(recipeOutput);
         this.ingredientRenderer = ingredientManager.getIngredientRenderer(recipeOutput);
+        this.recipeOutput = JeiUtilitiesConfig.getKeepOutputCount() ? ingredientHelper.copyIngredient(recipeOutput) : ingredientHelper.normalizeIngredient(recipeOutput);
+        this.focusValue = ingredientManager.getIngredientHelper(focusValue).normalizeIngredient(focusValue);
+        this.isInput = isInput;
+        this.index = recipeIndex;
+        this.recipe = recipe;
     }
 
     @Override
     public @NotNull IRecipeCategory<R> getRecipeCategory() {
         return this.recipeCategory;
+    }
+
+    @Override
+    public R getRecipe() {
+        return recipe;
     }
 
     @Override
@@ -92,6 +103,11 @@ public abstract class BasedRecipeInfo<R, T, V> implements IRecipeInfo<R, T, V> {
         return roles.stream()
                 .map(role -> focusFactory.createFocus(role, ingredientType, this.focusValue))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public IFocusGroup getFocusGroup() {
+        return FocusGroup.create(this.getFocuses());
     }
 
     @Override

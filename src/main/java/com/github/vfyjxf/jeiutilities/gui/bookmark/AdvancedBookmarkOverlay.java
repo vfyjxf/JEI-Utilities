@@ -1,8 +1,12 @@
 package com.github.vfyjxf.jeiutilities.gui.bookmark;
 
 import com.github.vfyjxf.jeiutilities.config.JeiUtilitiesConfig;
+import com.github.vfyjxf.jeiutilities.config.KeyBindings;
+import com.github.vfyjxf.jeiutilities.gui.recipe.RecipeLayoutLite;
+import com.github.vfyjxf.jeiutilities.jei.recipe.IRecipeInfo;
 import com.github.vfyjxf.jeiutilities.mixin.accessor.BookmarkOverlayAccessor;
 import com.mojang.blaze3d.vertex.PoseStack;
+import mezz.jei.api.ingredients.ITypedIngredient;
 import mezz.jei.bookmarks.BookmarkList;
 import mezz.jei.common.network.IConnectionToServer;
 import mezz.jei.common.util.ImmutableRect2i;
@@ -18,17 +22,27 @@ import mezz.jei.input.mouse.handlers.CombinedInputHandler;
 import mezz.jei.input.mouse.handlers.ProxyInputHandler;
 import net.minecraft.client.Minecraft;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.Optional;
 import java.util.Set;
 
+import static com.github.vfyjxf.jeiutilities.config.KeyBindings.displayPreview;
 
-@SuppressWarnings("unused")
+
+@SuppressWarnings({"unused", "rawtypes"})
 public class AdvancedBookmarkOverlay extends BookmarkOverlay {
 
     private static final int INNER_PADDING = 2;
     private static final int BUTTON_SIZE = 20;
 
+    private final BookmarkOverlayAccessor accessor = (BookmarkOverlayAccessor) this;
+
     private final GuiIconToggleButton recordConfigButton;
+    private final IngredientGridWithNavigation contents;
+    @Nullable
+    private RecipeLayoutLite recipeLayout;
+    private IRecipeInfo infoUnderMouse;
 
     public static BookmarkOverlay create(
             BookmarkList bookmarkList,
@@ -64,16 +78,16 @@ public class AdvancedBookmarkOverlay extends BookmarkOverlay {
                 serverConnection
         );
         this.recordConfigButton = RecordConfigButton.create(this);
+        this.contents = accessor.getContents();
     }
 
     @Override
     public boolean updateBounds(@NotNull Set<ImmutableRect2i> guiExclusionAreas) {
-        BookmarkOverlayAccessor accessor = (BookmarkOverlayAccessor) this;
         ImmutableRect2i parentArea = accessor.getParentArea();
         ImmutableRect2i availableContentsArea = parentArea.cropBottom(BUTTON_SIZE + INNER_PADDING);
-        boolean contentsHasRoom = accessor.getContents().updateBounds(availableContentsArea, guiExclusionAreas);
+        boolean contentsHasRoom = contents.updateBounds(availableContentsArea, guiExclusionAreas);
 
-        ImmutableRect2i contentsArea = accessor.getContents().getBackgroundArea();
+        ImmutableRect2i contentsArea = contents.getBackgroundArea();
 
         ImmutableRect2i bookmarkButtonArea = parentArea
                 .matchWidthAndX(contentsArea)
@@ -91,7 +105,7 @@ public class AdvancedBookmarkOverlay extends BookmarkOverlay {
         this.recordConfigButton.updateBounds(recordConfigArea);
 
         if (contentsHasRoom) {
-            accessor.getContents().updateLayout(false);
+            contents.updateLayout(false);
         }
         return contentsHasRoom;
     }
@@ -102,15 +116,35 @@ public class AdvancedBookmarkOverlay extends BookmarkOverlay {
         this.recordConfigButton.draw(poseStack, mouseX, mouseY, partialTicks);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void drawTooltips(@NotNull Minecraft minecraft, @NotNull PoseStack poseStack, int mouseX, int mouseY) {
-        super.drawTooltips(minecraft, poseStack, mouseX, mouseY);
-        this.recordConfigButton.drawTooltips(poseStack, mouseX, mouseY);
+        boolean renderRecipe = false;
+        if (KeyBindings.isKeyDown(displayPreview, false)) {
+            Optional<ITypedIngredient<?>> ingredient = getIngredientUnderMouse();
+            if (ingredient.isPresent() && ingredient.get().getIngredient() instanceof IRecipeInfo info) {
+                RecipeLayoutLite recipeLayout;
+                if (this.infoUnderMouse == info) {
+                    recipeLayout = this.recipeLayout;
+                } else {
+                    this.infoUnderMouse = info;
+                    recipeLayout = RecipeLayoutLite.create(info.getRecipeCategory(), info.getRecipe(), info.getFocusGroup(), mouseX, mouseY);
+                    this.recipeLayout = recipeLayout;
+                }
+                if (recipeLayout != null) {
+                    recipeLayout.drawRecipe(poseStack, mouseX, mouseY);
+                    renderRecipe = true;
+                }
+            }
+        }
+        if (!renderRecipe) {
+            super.drawTooltips(minecraft, poseStack, mouseX, mouseY);
+            this.recordConfigButton.drawTooltips(poseStack, mouseX, mouseY);
+        }
     }
 
     @Override
     public @NotNull IUserInputHandler createInputHandler() {
-        BookmarkOverlayAccessor accessor = (BookmarkOverlayAccessor) this;
         final IUserInputHandler bookmarkButtonInputHandler = accessor.getBookmarkButton().createInputHandler();
         final IUserInputHandler recordConfigButtonInputHandler = this.recordConfigButton.createInputHandler();
 

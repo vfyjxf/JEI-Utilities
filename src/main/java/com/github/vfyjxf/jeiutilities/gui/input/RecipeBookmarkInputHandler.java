@@ -115,7 +115,7 @@ public class RecipeBookmarkInputHandler implements IUserInputHandler {
         Pair<? extends RecipeLayout<?>, ?> output = getOutputUnderMouse(mouseX, mouseY);
         if (output != null) {
             IngredientLookupState state = ((RecipeGuiLogicAccessor) (JeiUtilitiesPlugin.logic)).getState();
-            if (state != null && !state.getFocuses().isEmpty()) {
+            if (!state.getFocuses().isEmpty()) {
                 IRecipeCategory<?> recipeCategory = state.getRecipeCategories().get(state.getRecipeCategoryIndex());
                 Object ingredient = state.getFocuses().getAllFocuses().get(0).getTypedValue().getIngredient();
                 @SuppressWarnings("rawtypes")
@@ -136,15 +136,13 @@ public class RecipeBookmarkInputHandler implements IUserInputHandler {
 
     private Pair<? extends RecipeLayout<?>, ?> getOutputUnderMouse(double mouseX, double mouseY) {
         List<RecipeLayout<?>> recipeLayouts = ((RecipesGuiAccessor) JeiUtilitiesPlugin.recipesGui).getRecipeLayouts();
-        if (recipeLayouts != null) {
-            for (RecipeLayout<?> recipeLayout : recipeLayouts) {
-                Pair<? extends RecipeLayout<?>, ?> outputPair = recipeLayout.getRecipeSlotUnderMouse(mouseX, mouseY)
-                        .filter(recipeSlot -> recipeSlot.getRole() == RecipeIngredientRole.OUTPUT && recipeSlot.getDisplayedIngredient().isPresent())
-                        .map(recipeSlot -> Pair.of(recipeLayout, recipeSlot.getDisplayedIngredient().get().getIngredient()))
-                        .orElse(null);
-                if (outputPair != null) {
-                    return outputPair;
-                }
+        for (RecipeLayout<?> recipeLayout : recipeLayouts) {
+            Pair<? extends RecipeLayout<?>, ?> outputPair = recipeLayout.getRecipeSlotUnderMouse(mouseX, mouseY)
+                    .filter(recipeSlot -> recipeSlot.getRole() == RecipeIngredientRole.OUTPUT && recipeSlot.getDisplayedIngredient().isPresent())
+                    .map(recipeSlot -> Pair.of(recipeLayout, recipeSlot.getDisplayedIngredient().get().getIngredient()))
+                    .orElse(null);
+            if (outputPair != null) {
+                return outputPair;
             }
         }
         return null;

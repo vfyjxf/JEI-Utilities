@@ -1,15 +1,3 @@
-import net.minecraftforge.accesstransformer.AccessTransformerEngine
-import org.objectweb.asm.ClassReader
-import org.objectweb.asm.ClassWriter
-import org.objectweb.asm.Opcodes
-import org.objectweb.asm.Type
-import org.objectweb.asm.tree.ClassNode
-
-import java.nio.file.FileSystem
-import java.nio.file.FileSystems
-import java.nio.file.Files
-import java.util.stream.StreamSupport
-
 buildscript {
     repositories {
         maven { url = 'https://maven.minecraftforge.net' }
@@ -21,8 +9,6 @@ buildscript {
         classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
         classpath 'org.parchmentmc:librarian:1.+'
         classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
-        classpath 'org.ow2.asm:asm-tree:9.2'
-        classpath 'net.minecraftforge:accesstransformers:8.+'
     }
 }
 
@@ -44,14 +30,14 @@ minecraft {
 
     mappings channel: "${channel_mapping}", version: "${version_mapping}"
 
-    accessTransformer = file(access_transformer)
-
     runs {
         client {
             workingDirectory project.file('run')
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
             property 'forge.enabledGameTestNamespaces', 'jeiutilities'
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
 
             mods {
                 jeiutilities {
@@ -62,13 +48,11 @@ minecraft {
 
         server {
             workingDirectory project.file('run')
-
             property 'forge.logging.markers', 'REGISTRIES'
-
             property 'forge.logging.console.level', 'debug'
-
-            // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
             property 'forge.enabledGameTestNamespaces', 'jeiutilities'
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
 
             mods {
                 jeiutilities {
@@ -133,7 +117,6 @@ configurations {
 dependencies {
     minecraft 'net.minecraftforge:forge:1.18.2-40.1.0'
 
-    //TODO:Move all mixin accessor to access transformer
 //    accessMod fg.deobf("mezz.jei:jei-${minecraft_version}:${jei_version}")
     compileOnly fg.deobf("mezz.jei:jei-${minecraft_version}:${jei_version}")
     runtimeOnly fg.deobf("mezz.jei:jei-${minecraft_version}:${jei_version}")
@@ -176,14 +159,17 @@ afterEvaluate {
     File atFile = file(access_transformer)
     if (atFile.exists()) {
         project.getLogger().info("Loading Mod Accessor file : {}", atFile.getPath())
-        AccessTransformerEngine.INSTANCE.addResource(atFile.toPath(),atFile.getName())
-        configurations.accessMod.forEach { dep -> {
-            //Copied from net.minecraftforge.accesstransformer.TransformerProcessor
+        AccessTransformerEngine.INSTANCE.addResource(atFile.toPath(), atFile.getName())
+        configurations.accessMod.forEach { dep ->
+            {
+                //Copied from net.minecraftforge.accesstransformer.TransformerProcessor
                 URI toUri = dep.toURI()
-                URI outJarURI = URI.create("jar:"+toUri.toASCIIString())
-                try (FileSystem outJar = FileSystems.newFileSystem(outJarURI, new HashMap<String, String>() {{
-                    put("create", "true")
-                }})) {
+                URI outJarURI = URI.create("jar:" + toUri.toASCIIString())
+                try (FileSystem outJar = FileSystems.newFileSystem(outJarURI, new HashMap<String, String>() {
+                    {
+                        put("create", "true")
+                    }
+                })) {
                     try (FileSystem jarFile = FileSystems.newFileSystem(dep.toPath(), ClassLoader.getSystemClassLoader())) {
                         Files.walk(StreamSupport.stream(jarFile.getRootDirectories().spliterator(), false).findFirst().orElseThrow(() -> new IllegalArgumentException("The JAR has no root?!")))
                                 .forEach(path -> {
@@ -193,7 +179,7 @@ afterEvaluate {
                                             final ClassReader classReader = new ClassReader(is)
                                             final ClassNode cn = new ClassNode()
                                             classReader.accept(cn, 0)
-                                            final Type type = Type.getType('L'+cn.name.replaceAll("\\.","/")+';')
+                                            final Type type = Type.getType('L' + cn.name.replaceAll("\\.", "/") + ';')
                                             if (AccessTransformerEngine.INSTANCE.handlesClass(type)) {
                                                 project.getLogger().debug("Transforming class {}", type)
                                                 AccessTransformerEngine.INSTANCE.transform(cn, type)
@@ -207,7 +193,7 @@ afterEvaluate {
                                         } catch (IOException e) {
                                             project.getLogger().error("Reading {}", path, e)
                                         }
-                                    } else if (!Files.exists(outPath)){
+                                    } else if (!Files.exists(outPath)) {
                                         try {
                                             Files.copy(path, outPath)
                                         } catch (IOException e) {
@@ -223,7 +209,7 @@ afterEvaluate {
                 }
             }
         }
-    }else if (!configurations.accessMod.files.isEmpty()){
+    } else if (!configurations.accessMod.files.isEmpty()) {
         project.getLogger().warn("Mod accessor file does not exist, you need to create an accessor file.")
     }
 }

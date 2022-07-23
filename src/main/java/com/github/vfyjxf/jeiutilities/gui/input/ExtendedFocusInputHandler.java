@@ -59,20 +59,17 @@ public class ExtendedFocusInputHandler implements IUserInputHandler {
 
         Optional<IUserInputHandler> result;
 
-        if (bookmarkContents.isMouseOver(input.getMouseX(), input.getMouseY())) {
+        if (JeiUtilitiesConfig.getRecordRecipes() && bookmarkContents.isMouseOver(input.getMouseX(), input.getMouseY())) {
             result = handleBookmarkShow(input);
         } else {
             result = handleOriginalShow(input);
         }
-
-        if (!input.isSimulate() && result.isPresent()) {
-            focusSource.getIngredientUnderMouse(input)
-                    .findFirst()
-                    .ifPresent(clicked -> {
-                        if (JeiUtilitiesConfig.getEnableHistory()) {
-                            JeiUtilitiesPlugin.historyGrid.addHistory(clicked.getTypedIngredient());
-                        }
-                    });
+        if (JeiUtilitiesConfig.getEnableHistory()) {
+            if (!input.isSimulate() && result.isPresent()) {
+                focusSource.getIngredientUnderMouse(input)
+                        .findFirst()
+                        .ifPresent(clicked -> JeiUtilitiesPlugin.historyGrid.addHistory(clicked.getTypedIngredient()));
+            }
         }
 
         return result;

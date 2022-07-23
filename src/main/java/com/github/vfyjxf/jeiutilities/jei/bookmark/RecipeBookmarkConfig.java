@@ -35,15 +35,10 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.github.vfyjxf.jeiutilities.jei.JeiUtilitiesPlugin.focusFactory;
@@ -144,7 +139,7 @@ public class RecipeBookmarkConfig extends BookmarkConfig {
         for (String ingredientJsonString : ingredientJsonStrings) {
             if (ingredientJsonString.startsWith(MARKER_STACK)) {
                 String itemStackAsJson = ingredientJsonString.substring(MARKER_STACK.length());
-                ITypedIngredient<ItemStack> itemStack = loadItemStack(itemStackAsJson, itemStackHelper, registeredIngredients);
+                ITypedIngredient<ItemStack> itemStack = loadItemStack(itemStackAsJson, itemStackHelper, registeredIngredients, true);
                 if (itemStack != null) {
                     bookmarkList.addToList(itemStack, false);
                 }
@@ -186,11 +181,11 @@ public class RecipeBookmarkConfig extends BookmarkConfig {
         Object output = getIngredientByUid(jsonObject.get("output").getAsString(), itemStackHelper, ingredientTypes, registeredIngredients);
         Object focusValue = getIngredientByUid(jsonObject.get("focus").getAsString(), itemStackHelper, ingredientTypes, registeredIngredients);
         boolean isInput = jsonObject.get("isInput").getAsBoolean();
+        List<RecipeIngredientRole> roles = isInput ? List.of(RecipeIngredientRole.INPUT, RecipeIngredientRole.CATALYST) : List.of(RecipeIngredientRole.OUTPUT);
+        List<? extends IFocus<?>> focuses = getFocuses(focusValue, roles);
 
         if (jsonObject.has("registerName")) {
             ResourceLocation registerName = new ResourceLocation(jsonObject.get("registerName").getAsString());
-            List<RecipeIngredientRole> roles = isInput ? List.of(RecipeIngredientRole.INPUT, RecipeIngredientRole.CATALYST) : List.of(RecipeIngredientRole.OUTPUT);
-            List<? extends IFocus<?>> focuses = getFocuses(focusValue, roles);
             Pair<?, Integer> recipePair = RecipeHelper.getRecipeAndIndexByName(recipeTypeData, registerName, focuses);
             if (recipePair != null) {
                 IRecipeInfo recipeInfo = BasedRecipeInfo.create(
@@ -206,19 +201,35 @@ public class RecipeBookmarkConfig extends BookmarkConfig {
         }
 
         if (jsonObject.has("inputs")) {
+            JsonArray inputsArray = jsonObject.get("inputs").getAsJsonArray();
+            Map<IIngredientType<?>, List<String>> recipeUidMap = getRecipeUidMap(inputsArray, ingredientTypes, registeredIngredients);
+            if (recipeUidMap.isEmpty()) {
+                return Optional.empty();
+            }
+            Pair<?, Integer> recipePair = RecipeHelper.getRecipeAndIndexByInputs(recipeTypeData, focuses, recipeUidMap, output, registeredIngredients);
+            if (recipePair != null) {
+                IRecipeInfo recipeInfo = BasedRecipeInfo.create(
+                        recipeTypeData.getRecipeCategory(),
+                        recipePair.getLeft(),
+                        output,
+                        focusValue,
+                        isInput,
+                        recipePair.getRight()
+                );
+                return IngredientHelper.createTypedIngredient(recipeInfo, registeredIngredients);
+            }
 
         }
 
         return Optional.empty();
     }
 
-    private static ITypedIngredient<ItemStack> loadItemStack(String itemStackAsJson, IIngredientHelper<ItemStack> itemStackHelper, RegisteredIngredients registeredIngredients) {
+    private static ITypedIngredient<ItemStack> loadItemStack(String itemStackAsJson, IIngredientHelper<ItemStack> itemStackHelper, RegisteredIngredients registeredIngredients, boolean normalize) {
         try {
             CompoundTag itemStackAsNbt = TagParser.parseTag(itemStackAsJson);
             ItemStack itemStack = ItemStack.of(itemStackAsNbt);
             if (!itemStack.isEmpty()) {
-                ItemStack normalized = itemStackHelper.normalizeIngredient(itemStack);
-                Optional<ITypedIngredient<ItemStack>> typedIngredient = TypedIngredient.createTyped(registeredIngredients, VanillaTypes.ITEM_STACK, normalized);
+                Optional<ITypedIngredient<ItemStack>> typedIngredient = TypedIngredient.createTyped(registeredIngredients, VanillaTypes.ITEM_STACK, normalize ? itemStackHelper.normalizeIngredient(itemStack) : itemStack);
                 if (typedIngredient.isEmpty()) {
                     LOGGER.warn("Failed to load bookmarked ItemStack from json string, the item no longer exists:\n{}", itemStackAsJson);
                 } else {
@@ -258,7 +269,7 @@ public class RecipeBookmarkConfig extends BookmarkConfig {
     private static Object getIngredientByUid(String ingredientUid, IIngredientHelper<ItemStack> itemStackHelper, Collection<IIngredientType<?>> ingredientTypes, RegisteredIngredients registeredIngredients) {
         if (ingredientUid.startsWith(MARKER_STACK)) {
             String itemStackAsJson = ingredientUid.substring(MARKER_STACK.length());
-            ITypedIngredient<ItemStack> itemStack = loadItemStack(itemStackAsJson, itemStackHelper, registeredIngredients);
+            ITypedIngredient<ItemStack> itemStack = loadItemStack(itemStackAsJson, itemStackHelper, registeredIngredients, false);
             if (itemStack != null) {
                 return itemStack.getIngredient();
             }
@@ -296,6 +307,52 @@ public class RecipeBookmarkConfig extends BookmarkConfig {
                 return ingredient;
             }
         }
+        return null;
+    }
+
+    private static Map<IIngredientType<?>, List<String>> getRecipeUidMap(JsonArray inputsArray, Collection<IIngredientType<?>> ingredientTypes, RegisteredIngredients registeredIngredients) {
+        HashMap<IIngredientType<?>, List<String>> recipeUidMap = new HashMap<>(inputsArray.size());
+        for (JsonElement element : inputsArray) {
+            if (element.isJsonArray()) {
+                List<String> inputsUidListInner = new ArrayList<>();
+                for (JsonElement elementInner : element.getAsJsonArray()) {
+                    if (elementInner.isJsonPrimitive()) {
+                        inputsUidListInner.add(elementInner.getAsString());
+                    }
+                }
+                IIngredientType<?> ingredientType = getIngredientType(inputsUidListInner, ingredientTypes, registeredIngredients);
+                if (ingredientType == null) {
+                    LOGGER.error("Found unknown type of ingredients :\n{}", inputsUidListInner);
+                    return Map.of();
+                }
+                recipeUidMap.put(ingredientType, inputsUidListInner);
+            }
+        }
+        return recipeUidMap;
+    }
+
+    private static IIngredientType<?> getIngredientType(List<String> inputsUidListInner, Collection<IIngredientType<?>> ingredientTypes, RegisteredIngredients registeredIngredients) {
+        for (String ingredientUid : inputsUidListInner) {
+            //First check if the type corresponding to the uid is ItemStack.
+            try {
+                CompoundTag itemStackAsNbt = TagParser.parseTag(ingredientUid);
+                ItemStack itemStack = ItemStack.of(itemStackAsNbt);
+                if (!itemStack.isEmpty()) {
+                    return VanillaTypes.ITEM_STACK;
+                }
+            } catch (CommandSyntaxException ignored) {
+                // :P
+            }
+
+            for (IIngredientType<?> ingredientType : ingredientTypes) {
+                IngredientInfo<?> ingredientInfo = registeredIngredients.getIngredientInfo(ingredientType);
+                Object ingredient = ingredientInfo.getIngredientByUid(ingredientUid);
+                if (ingredient != null) {
+                    return ingredientType;
+                }
+            }
+        }
+
         return null;
     }
 

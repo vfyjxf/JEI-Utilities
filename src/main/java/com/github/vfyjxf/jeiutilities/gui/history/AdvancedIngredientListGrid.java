@@ -1,7 +1,6 @@
 package com.github.vfyjxf.jeiutilities.gui.history;
 
 import com.github.vfyjxf.jeiutilities.config.JeiUtilitiesConfig;
-import com.github.vfyjxf.jeiutilities.helper.IngredientHelper;
 import com.github.vfyjxf.jeiutilities.jei.JeiUtilitiesPlugin;
 import com.github.vfyjxf.jeiutilities.jei.recipe.IRecipeInfo;
 import com.github.vfyjxf.jeiutilities.mixin.accessor.IngredientGridAccessor;
@@ -24,6 +23,7 @@ import mezz.jei.gui.GuiScreenHelper;
 import mezz.jei.gui.overlay.IngredientGrid;
 import mezz.jei.ingredients.RegisteredIngredients;
 import mezz.jei.ingredients.TypedIngredient;
+import mezz.jei.input.IClickedIngredient;
 import mezz.jei.input.mouse.handlers.DeleteItemInputHandler;
 import mezz.jei.render.ElementRenderer;
 import mezz.jei.render.IngredientListRenderer;
@@ -38,8 +38,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
-import static com.github.vfyjxf.jeiutilities.helper.IngredientHelper.*;
+import static com.github.vfyjxf.jeiutilities.helper.IngredientHelper.createTypedIngredient;
 import static com.github.vfyjxf.jeiutilities.jei.JeiUtilitiesPlugin.registeredIngredients;
 
 /**
@@ -52,6 +53,7 @@ public class AdvancedIngredientListGrid extends IngredientGrid {
     private static final int MIN_ROWS = 5;
 
     private final IngredientGridAccessor accessor = (IngredientGridAccessor) this;
+
     private final IngredientListRenderer historyListRender;
     private final List<ITypedIngredient<?>> historyList;
 
@@ -200,6 +202,33 @@ public class AdvancedIngredientListGrid extends IngredientGrid {
         }
     }
 
+    @Override
+    public void drawTooltips(@NotNull Minecraft minecraft, @NotNull PoseStack poseStack, int mouseX, int mouseY) {
+        super.drawTooltips(minecraft, poseStack, mouseX, mouseY);
+        if (isMouseOver(mouseX, mouseY)) {
+            this.historyListRender.getSlots()
+                    .filter(s -> s.isMouseOver(mouseX, mouseY))
+                    .map(IngredientListSlot::getTypedIngredient)
+                    .flatMap(Optional::stream)
+                    .findFirst()
+                    .ifPresent(ingredient -> accessor.getTooltipHelper().drawTooltip(poseStack, mouseX, mouseY, ingredient));
+        }
+    }
+
+    @Override
+    public @NotNull Stream<IClickedIngredient<?>> getIngredientUnderMouse(double mouseX, double mouseY) {
+        return Stream.concat(
+                super.getIngredientUnderMouse(mouseX, mouseY),
+                historyListRender.getSlots()
+                        .filter(s -> s.isMouseOver(mouseX, mouseY))
+                        .map(IngredientListSlot::getIngredientRenderer)
+                        .flatMap(Optional::stream)
+        );
+    }
+
+    /**
+     *Copied from <a href="https://github.com/shedaniel/RoughlyEnoughItems/blob/8.x-1.18.2/runtime/src/main/java/me/shedaniel/rei/impl/client/gui/widget/favorites/history/DisplayHistoryWidget.java">...</a>
+     */
     private void drawHorizontalDashedLine(PoseStack poseStack, int x1, int x2, int y, int color, boolean reverse) {
         float offset = (System.currentTimeMillis() % 600) / 100.0F;
         if (!reverse) offset = 6 - offset;
@@ -230,6 +259,9 @@ public class AdvancedIngredientListGrid extends IngredientGrid {
         RenderSystem.enableTexture();
     }
 
+    /**
+     *Copied from <a href="https://github.com/shedaniel/RoughlyEnoughItems/blob/8.x-1.18.2/runtime/src/main/java/me/shedaniel/rei/impl/client/gui/widget/favorites/history/DisplayHistoryWidget.java">...</a>
+     */
     private void drawVerticalDashedLine(PoseStack poseStack, int x, int y1, int y2, int color, boolean reverse) {
         float offset = (System.currentTimeMillis() % 600) / 100.0F;
         if (!reverse) offset = 6 - offset;

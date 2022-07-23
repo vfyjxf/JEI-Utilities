@@ -2,6 +2,7 @@ package com.github.vfyjxf.jeiutilities.config;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.ClientRegistry;
 import net.minecraftforge.client.settings.KeyConflictContext;
 import net.minecraftforge.client.settings.KeyModifier;
@@ -53,6 +54,14 @@ public final class KeyBindings {
 
     public static boolean isKeyDown(KeyMapping key, InputConstants.Key keycode) {
         return isKeyDown(key, true, keycode);
+    }
+
+    public static boolean isKeyDown(KeyMapping key, boolean checkModifier) {
+        if (checkModifier) {
+            return key.isDown();
+        } else {
+            return InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), key.getKey().getValue());
+        }
     }
 
 }

@@ -3,6 +3,7 @@ package com.github.vfyjxf.jeiutilities.helper;
 import com.github.vfyjxf.jeiutilities.jei.JeiUtilitiesPlugin;
 import mezz.jei.api.ingredients.IIngredientHelper;
 import mezz.jei.api.ingredients.IIngredientRenderer;
+import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.ingredients.ITypedIngredient;
 import mezz.jei.api.ingredients.subtypes.UidContext;
 import mezz.jei.ingredients.RegisteredIngredients;
@@ -39,6 +40,10 @@ public class IngredientHelper {
 
     public static <T> IIngredientRenderer<T> getIngredientRenderer(@NotNull T ingredient) {
         return JeiUtilitiesPlugin.ingredientManager.getIngredientRenderer(ingredient);
+    }
+
+    public static  <V> IIngredientType<V> getIngredientType(@NotNull V ingredient) {
+        return JeiUtilitiesPlugin.registeredIngredients.getIngredientType(ingredient);
     }
 
 }

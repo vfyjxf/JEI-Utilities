@@ -2,13 +2,10 @@ package com.github.vfyjxf.jeiutilities.jei.recipe;
 
 import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.ingredients.subtypes.UidContext;
-import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
 
 @SuppressWarnings("rawtypes")
 public class NamedRecipeInfo<R, T, V> extends BasedRecipeInfo<R, T, V> {
@@ -19,13 +16,14 @@ public class NamedRecipeInfo<R, T, V> extends BasedRecipeInfo<R, T, V> {
 
     public NamedRecipeInfo(
             IRecipeCategory<R> recipeCategory,
+            R recipe,
             T recipeOutput,
             V focusValue,
             boolean isInput,
             int recipeIndex,
             ResourceLocation registerName
     ) {
-        super(recipeCategory, recipeOutput, focusValue, isInput, recipeIndex);
+        super(recipeCategory, recipe, recipeOutput, focusValue, isInput, recipeIndex);
         this.registerName = registerName;
     }
 
@@ -44,7 +42,22 @@ public class NamedRecipeInfo<R, T, V> extends BasedRecipeInfo<R, T, V> {
     public IRecipeInfo copy() {
         return new NamedRecipeInfo(
                 this.recipeCategory,
+                this.recipe,
                 this.recipeOutput,
+                this.focusValue,
+                this.isInput,
+                this.index,
+                this.registerName
+        );
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public IRecipeInfo normalizeIngredient() {
+        return new NamedRecipeInfo(
+                this.recipeCategory,
+                this.recipe,
+                this.getIngredientHelper().normalizeIngredient(this.recipeOutput),
                 this.focusValue,
                 this.isInput,
                 this.index,
