@@ -25,6 +25,7 @@ import mezz.jei.gui.recipes.IRecipeGuiLogic;
 import mezz.jei.gui.recipes.RecipesGui;
 import mezz.jei.ingredients.RegisteredIngredients;
 import mezz.jei.recipes.RecipeManagerInternal;
+import mezz.jei.recipes.RecipeTransferManager;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
@@ -45,6 +46,7 @@ public class JeiUtilitiesPlugin implements IModPlugin {
     public static IIngredientListOverlay ingredientListOverlay;
     public static IBookmarkOverlay bookmarkOverlay;
     public static RecipesGui recipesGui;
+    public static RecipeTransferManager recipeTransferManager;
     public static AdvancedIngredientListGrid historyGrid;
 
     @Override
@@ -59,7 +61,7 @@ public class JeiUtilitiesPlugin implements IModPlugin {
         recipesGui = (RecipesGui) jeiRuntime.getRecipesGui();
         logic = ((RecipesGuiAccessor) recipesGui).getLogic();
         registeredIngredients = ((RecipeGuiLogicAccessor) logic).getRegisteredIngredients();
-
+        recipeTransferManager = ((RecipesGuiAccessor) recipesGui).getRecipeTransferManager();
     }
 
     @SuppressWarnings("unchecked")

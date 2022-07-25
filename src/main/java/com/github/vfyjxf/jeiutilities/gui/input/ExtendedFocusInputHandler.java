@@ -57,26 +57,16 @@ public class ExtendedFocusInputHandler implements IUserInputHandler {
     @Override
     public @NotNull Optional<IUserInputHandler> handleUserInput(@NotNull Screen screen, @NotNull UserInput input) {
 
-        Optional<IUserInputHandler> result;
-
         if (JeiUtilitiesConfig.getRecordRecipes() && bookmarkContents.isMouseOver(input.getMouseX(), input.getMouseY())) {
-            result = handleBookmarkShow(input);
+            return handleBookmarkShow(input);
         } else {
-            result = handleOriginalShow(input);
-        }
-        if (JeiUtilitiesConfig.getEnableHistory()) {
-            if (!input.isSimulate() && result.isPresent()) {
-                focusSource.getIngredientUnderMouse(input)
-                        .findFirst()
-                        .ifPresent(clicked -> JeiUtilitiesPlugin.historyGrid.addHistory(clicked.getTypedIngredient()));
-            }
+            return handleOriginalShow(input);
         }
 
-        return result;
     }
 
     private Optional<IUserInputHandler> handleBookmarkShow(UserInput input) {
-        if (isKeyDown(KeyBindings.showRecipe, false, input.getKey())) {
+        if (isKeyDown(KeyBindings.showRecipe, true, input.getKey())) {
             return handleShow(input, List.of(RecipeIngredientRole.OUTPUT), false);
         }
 
@@ -120,7 +110,7 @@ public class ExtendedFocusInputHandler implements IUserInputHandler {
                                     .<IFocus<?>>map(role -> new Focus<>(role, clicked.getTypedIngredient()))
                                     .toList();
                         }
-
+                        JeiUtilitiesPlugin.historyGrid.addHistory(clicked.getTypedIngredient());
                         recipesGui.show(focuses);
                         boolean handleInversion = (!Screen.hasShiftDown() && JeiUtilitiesConfig.isEnableMode()) ||
                                 (Screen.hasShiftDown() && JeiUtilitiesConfig.isRestrictedMode());
@@ -153,6 +143,7 @@ public class ExtendedFocusInputHandler implements IUserInputHandler {
                         List<IFocus<?>> focuses = roles.stream()
                                 .<IFocus<?>>map(role -> new Focus<>(role, clicked.getTypedIngredient()))
                                 .toList();
+                        JeiUtilitiesPlugin.historyGrid.addHistory(clicked.getTypedIngredient());
                         recipesGui.show(focuses);
                     }
                     return LimitedAreaInputHandler.create(this, clicked.getArea());

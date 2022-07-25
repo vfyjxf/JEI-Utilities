@@ -5,27 +5,37 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.ClientRegistry;
 import net.minecraftforge.client.settings.KeyConflictContext;
-import net.minecraftforge.client.settings.KeyModifier;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.Collection;
+import java.util.List;
 
 public final class KeyBindings {
 
     public static final KeyMapping displayPreview;
-    public static final KeyMapping transferRecipe;
+    public static final List<KeyMapping> transferRecipe;
     public static final KeyMapping transferRecipeMax;
 
+    private static final List<KeyMapping> allBindings;
+
     static {
-        displayPreview = new KeyMapping("key.jeiutilities.displayPreview", KeyConflictContext.GUI, getKey(GLFW.GLFW_KEY_LEFT_CONTROL), "key.jeiutilities.category");
-        transferRecipe = new KeyMapping("key.jeiutilities.transferRecipe", KeyConflictContext.GUI, KeyModifier.CONTROL, getKey(GLFW.GLFW_KEY_W), "key.jeiutilities.category");
-        transferRecipeMax = new KeyMapping("key.jeiutilities.transferRecipeMax", KeyConflictContext.GUI, KeyModifier.CONTROL, getKey(GLFW.GLFW_KEY_T), "key.jeiutilities.category");
+        KeyMapping transferRecipe1;
+//        KeyMapping transferRecipe2;
+        allBindings = List.of(
+                displayPreview = new KeyMapping("key.jeiutilities.displayPreview", KeyConflictContext.GUI, getKey(GLFW.GLFW_KEY_LEFT_CONTROL), "key.jeiutilities.category"),
+                transferRecipe1 = new KeyMapping("key.jeiutilities.transferRecipe", KeyConflictContext.GUI, getKey(GLFW.GLFW_KEY_W), "key.jeiutilities.category"),
+//                transferRecipe2 = new KeyMapping("key.jeiutilities.transferRecipe", KeyConflictContext.GUI, InputConstants.Type.MOUSE, InputConstants.MOUSE_BUTTON_LEFT, "key.jeiutilities.category"),
+                transferRecipeMax = new KeyMapping("key.jeiutilities.transferRecipeMax", KeyConflictContext.GUI, getKey(GLFW.GLFW_KEY_T), "key.jeiutilities.category")
+        );
+
+//        transferRecipe = List.of(transferRecipe1, transferRecipe2);
+        transferRecipe = List.of(transferRecipe1);
     }
 
     public static void init() {
-        ClientRegistry.registerKeyBinding(displayPreview);
-        ClientRegistry.registerKeyBinding(transferRecipe);
-        ClientRegistry.registerKeyBinding(transferRecipeMax);
+        for (KeyMapping keyMapping : allBindings) {
+            ClientRegistry.registerKeyBinding(keyMapping);
+        }
     }
 
     static InputConstants.Key getKey(int key) {
@@ -52,6 +62,10 @@ public final class KeyBindings {
         return keys.stream().anyMatch(key -> isKeyDown(key, checkModifier, keyCode));
     }
 
+    public static boolean isKeyDown(Collection<KeyMapping> keys, InputConstants.Key keyCode) {
+        return isKeyDown(keys, true, keyCode);
+    }
+
     public static boolean isKeyDown(KeyMapping key, InputConstants.Key keycode) {
         return isKeyDown(key, true, keycode);
     }
@@ -62,6 +76,18 @@ public final class KeyBindings {
         } else {
             return InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), key.getKey().getValue());
         }
+    }
+
+    public static boolean isKeyDown(KeyMapping key) {
+        return key.isDown();
+    }
+
+    public static boolean isKeyDown(Collection<KeyMapping> keys) {
+        return keys.stream().anyMatch(keyMapping -> isKeyDown(keyMapping, false));
+    }
+
+    public static boolean isKeyDown(InputConstants.Key keycode) {
+        return InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), keycode.getValue());
     }
 
 }

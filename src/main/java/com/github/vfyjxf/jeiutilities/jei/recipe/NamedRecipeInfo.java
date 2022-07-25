@@ -34,7 +34,10 @@ public class NamedRecipeInfo<R, T, V> extends BasedRecipeInfo<R, T, V> {
 
     @Override
     public @NotNull String getUniqueId() {
-        return toString();
+        if (this.uniqueId == null) {
+            this.uniqueId = toString();
+        }
+        return this.uniqueId;
     }
 
     @SuppressWarnings("unchecked")

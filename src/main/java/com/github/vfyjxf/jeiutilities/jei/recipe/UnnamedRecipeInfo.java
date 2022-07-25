@@ -9,6 +9,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.github.vfyjxf.jeiutilities.jei.JeiUtilitiesPlugin.registeredIngredients;
@@ -34,7 +35,10 @@ public class UnnamedRecipeInfo<R, T, V> extends BasedRecipeInfo<R, T, V> {
 
     @Override
     public @NotNull String getUniqueId() {
-        return toString();
+        if (this.uniqueId == null) {
+            this.uniqueId = toString();
+        }
+        return this.uniqueId;
     }
 
     @SuppressWarnings("unchecked")
@@ -75,7 +79,7 @@ public class UnnamedRecipeInfo<R, T, V> extends BasedRecipeInfo<R, T, V> {
     }
 
     private String getInputsAsString() {
-        List<List<String>> recipeIngredientUidList = (List<List<String>>) RecipeHelper.getRecipeUidMap(this.recipe, this.recipeCategory, registeredIngredients).values();
+        List<List<String>> recipeIngredientUidList = new ArrayList<>(RecipeHelper.getRecipeUidMap(this.recipe, this.recipeCategory, registeredIngredients).values());
         if (!recipeIngredientUidList.isEmpty()) {
 
             recipeIngredientUidList.sort((o1, o2) -> Integer.compare(o2.size(), o1.size()));

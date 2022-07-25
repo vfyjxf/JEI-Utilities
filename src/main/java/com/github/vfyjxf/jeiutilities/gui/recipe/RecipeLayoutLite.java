@@ -3,6 +3,7 @@ package com.github.vfyjxf.jeiutilities.gui.recipe;
 import com.github.vfyjxf.jeiutilities.gui.elements.RenderableNineSliceTexture;
 import com.github.vfyjxf.jeiutilities.gui.textures.JeiUtilitiesTextures;
 import com.github.vfyjxf.jeiutilities.jei.JeiUtilitiesPlugin;
+import com.github.vfyjxf.jeiutilities.jei.recipe.IRecipeInfo;
 import com.github.vfyjxf.jeiutilities.mixin.accessor.RecipeLayoutAccessor;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -11,6 +12,7 @@ import mezz.jei.api.helpers.IModIdHelper;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.category.IRecipeCategory;
+import mezz.jei.api.recipe.transfer.IRecipeTransferError;
 import mezz.jei.gui.ingredients.RecipeSlot;
 import mezz.jei.gui.ingredients.RecipeSlots;
 import mezz.jei.gui.recipes.OutputSlotTooltipCallback;
@@ -18,8 +20,11 @@ import mezz.jei.gui.recipes.RecipeLayout;
 import mezz.jei.gui.recipes.ShapelessIcon;
 import mezz.jei.gui.recipes.builder.RecipeLayoutBuilder;
 import mezz.jei.ingredients.RegisteredIngredients;
+import mezz.jei.transfer.RecipeTransferUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -36,6 +41,9 @@ public class RecipeLayoutLite<R> extends RecipeLayout<R> {
 
     private final RenderableNineSliceTexture recipeBorder;
     private final RegisteredIngredients registeredIngredients;
+    @Nullable
+    private IRecipeTransferError error;
+    private boolean showError;
 
     @Nullable
     public static <T> RecipeLayoutLite<T> create(IRecipeCategory<T> recipeCategory, T recipe, IFocusGroup focuses, int posX, int posY) {
@@ -52,6 +60,12 @@ public class RecipeLayoutLite<R> extends RecipeLayout<R> {
             return recipeLayout;
         }
         return null;
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    @Nullable
+    public static RecipeLayoutLite<?> create(IRecipeInfo recipeInfo, int posX, int posY) {
+        return create(recipeInfo.getRecipeCategory(), recipeInfo.getRecipe(), recipeInfo.getFocusGroup(), posX, posY);
     }
 
     private boolean setRecipeLayout(
@@ -151,5 +165,32 @@ public class RecipeLayoutLite<R> extends RecipeLayout<R> {
         RenderSystem.enableDepthTest();
         RenderSystem.disableBlend();
     }
+
+
+    public void transferRecipe(AbstractContainerMenu container, RecipeLayout<?> recipeLayout, Player player, boolean maxTransfer) {
+        RecipeTransferUtil.transferRecipe(JeiUtilitiesPlugin.recipeTransferManager, container, recipeLayout, player, maxTransfer);
+    }
+
+    public IRecipeTransferError getTransferRecipeError(AbstractContainerMenu container, RecipeLayout<?> recipeLayout, Player player, boolean update) {
+        if (this.error == null || update) {
+            this.error = RecipeTransferUtil.getTransferRecipeError(JeiUtilitiesPlugin.recipeTransferManager, container, recipeLayout, player);
+        }
+        return error;
+    }
+
+    public @Nullable IRecipeTransferError getError() {
+        return error;
+    }
+
+    public void setShowError(boolean showError) {
+        this.showError = showError;
+    }
+
+    public void showError(PoseStack poseStack, int mouseX, int mouseY) {
+        if (this.error != null && this.showError) {
+            this.error.showError(poseStack, mouseX, mouseY, this.getRecipeSlots().getView(), getPosX(), getPosY());
+        }
+    }
+
 
 }

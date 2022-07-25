@@ -93,7 +93,7 @@ public class RecipeHelper {
     public static <R> Map<IIngredientType<?>, List<String>> getRecipeUidMap(R recipe, IRecipeCategory recipeCategory, RegisteredIngredients registeredIngredients) {
         Map<IIngredientType<?>, List<? extends List<?>>> recipeMap = RecipeHelper.getRecipeMap(recipe, recipeCategory, registeredIngredients);
         Map<IIngredientType<?>, List<String>> recipeUidMap = new HashMap<>();
-        for (IIngredientType<?> type : recipeMap.keySet()){
+        for (IIngredientType<?> type : recipeMap.keySet()) {
             List<? extends List<?>> ingredientInType = recipeMap.get(type);
             List<String> uidListForType = new ArrayList<>();
             for (List<?> ingredientInSlot : ingredientInType) {
@@ -103,7 +103,7 @@ public class RecipeHelper {
                     uidListForType.add(getIngredientUid(ingredientInSlot.get(0)));
                 }
             }
-            recipeUidMap.put(type,uidListForType);
+            recipeUidMap.put(type, uidListForType);
         }
         return recipeUidMap;
     }

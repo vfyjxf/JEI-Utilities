@@ -33,6 +33,7 @@ public abstract class BasedRecipeInfo<R, T, V> implements IRecipeInfo<R, T, V> {
     protected final V focusValue;
     protected final boolean isInput;
     protected final int index;
+    protected String uniqueId;
 
     private final IIngredientHelper<T> ingredientHelper;
     private final IIngredientRenderer<T> ingredientRenderer;

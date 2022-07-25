@@ -1,6 +1,7 @@
 package com.github.vfyjxf.jeiutilities.gui.history;
 
 import com.github.vfyjxf.jeiutilities.config.JeiUtilitiesConfig;
+import com.github.vfyjxf.jeiutilities.config.SplittingMode;
 import com.github.vfyjxf.jeiutilities.jei.JeiUtilitiesPlugin;
 import com.github.vfyjxf.jeiutilities.jei.recipe.IRecipeInfo;
 import com.github.vfyjxf.jeiutilities.mixin.accessor.IngredientGridAccessor;
@@ -193,12 +194,17 @@ public class AdvancedIngredientListGrid extends IngredientGrid {
             int endX = area.getX() + area.getWidth();
             int startY = area.getY() + area.getHeight() - historyHeight;
             int endY = area.getY() + area.getHeight();
-            int lineColor = JeiUtilitiesConfig.getBackgroundColour();
-            drawHorizontalDashedLine(poseStack, area.getX(), endX, startY, lineColor, false);
-            drawHorizontalDashedLine(poseStack, area.getX(), endX, endY, lineColor, true);
+            int colour = JeiUtilitiesConfig.getBackgroundColour();
+            if (JeiUtilitiesConfig.getSplittingMode() == SplittingMode.DOTTED_LINE) {
+                drawHorizontalDashedLine(poseStack, area.getX(), endX, startY, colour, false);
+                drawHorizontalDashedLine(poseStack, area.getX(), endX, endY, colour, true);
 
-            drawVerticalDashedLine(poseStack, area.getX(), startY, endY, lineColor, false);
-            drawVerticalDashedLine(poseStack, endX - 1, startY, endY, lineColor, true);
+                drawVerticalDashedLine(poseStack, area.getX(), startY, endY, colour, false);
+                drawVerticalDashedLine(poseStack, endX - 1, startY, endY, colour, true);
+            }
+            if (JeiUtilitiesConfig.getSplittingMode() == SplittingMode.BACKGROUND) {
+                
+            }
         }
     }
 
@@ -227,7 +233,7 @@ public class AdvancedIngredientListGrid extends IngredientGrid {
     }
 
     /**
-     *Copied from <a href="https://github.com/shedaniel/RoughlyEnoughItems/blob/8.x-1.18.2/runtime/src/main/java/me/shedaniel/rei/impl/client/gui/widget/favorites/history/DisplayHistoryWidget.java">...</a>
+     * Copied from <a href="https://github.com/shedaniel/RoughlyEnoughItems/blob/8.x-1.18.2/runtime/src/main/java/me/shedaniel/rei/impl/client/gui/widget/favorites/history/DisplayHistoryWidget.java">...</a>
      */
     private void drawHorizontalDashedLine(PoseStack poseStack, int x1, int x2, int y, int color, boolean reverse) {
         float offset = (System.currentTimeMillis() % 600) / 100.0F;
@@ -260,7 +266,7 @@ public class AdvancedIngredientListGrid extends IngredientGrid {
     }
 
     /**
-     *Copied from <a href="https://github.com/shedaniel/RoughlyEnoughItems/blob/8.x-1.18.2/runtime/src/main/java/me/shedaniel/rei/impl/client/gui/widget/favorites/history/DisplayHistoryWidget.java">...</a>
+     * Copied from <a href="https://github.com/shedaniel/RoughlyEnoughItems/blob/8.x-1.18.2/runtime/src/main/java/me/shedaniel/rei/impl/client/gui/widget/favorites/history/DisplayHistoryWidget.java">...</a>
      */
     private void drawVerticalDashedLine(PoseStack poseStack, int x, int y1, int y2, int color, boolean reverse) {
         float offset = (System.currentTimeMillis() % 600) / 100.0F;
