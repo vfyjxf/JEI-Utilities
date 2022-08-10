@@ -1,4 +1,4 @@
-package com.github.vfyjxf.jeiutilities.gui.input;
+package com.github.vfyjxf.jeiutilities.gui.input.handler;
 
 import com.github.vfyjxf.jeiutilities.config.JeiUtilitiesConfig;
 import com.github.vfyjxf.jeiutilities.jei.JeiUtilitiesPlugin;
@@ -110,7 +110,9 @@ public class ExtendedFocusInputHandler implements IUserInputHandler {
                                     .<IFocus<?>>map(role -> new Focus<>(role, clicked.getTypedIngredient()))
                                     .toList();
                         }
-                        JeiUtilitiesPlugin.historyGrid.addHistory(clicked.getTypedIngredient());
+                        if (JeiUtilitiesConfig.getEnableHistory()) {
+                            JeiUtilitiesPlugin.historyGrid.addHistory(clicked.getTypedIngredient());
+                        }
                         recipesGui.show(focuses);
                         boolean handleInversion = (!Screen.hasShiftDown() && JeiUtilitiesConfig.isEnableMode()) ||
                                 (Screen.hasShiftDown() && JeiUtilitiesConfig.isRestrictedMode());
@@ -143,7 +145,9 @@ public class ExtendedFocusInputHandler implements IUserInputHandler {
                         List<IFocus<?>> focuses = roles.stream()
                                 .<IFocus<?>>map(role -> new Focus<>(role, clicked.getTypedIngredient()))
                                 .toList();
-                        JeiUtilitiesPlugin.historyGrid.addHistory(clicked.getTypedIngredient());
+                        if (JeiUtilitiesConfig.getEnableHistory()) {
+                            JeiUtilitiesPlugin.historyGrid.addHistory(clicked.getTypedIngredient());
+                        }
                         recipesGui.show(focuses);
                     }
                     return LimitedAreaInputHandler.create(this, clicked.getArea());

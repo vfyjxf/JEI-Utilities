@@ -1,7 +1,6 @@
 package com.github.vfyjxf.jeiutilities.gui.bookmark;
 
 import com.github.vfyjxf.jeiutilities.config.JeiUtilitiesConfig;
-import com.github.vfyjxf.jeiutilities.config.KeyBindings;
 import com.github.vfyjxf.jeiutilities.gui.recipe.RecipeLayoutLite;
 import com.github.vfyjxf.jeiutilities.jei.recipe.IRecipeInfo;
 import com.github.vfyjxf.jeiutilities.mixin.accessor.BookmarkOverlayAccessor;
@@ -21,15 +20,14 @@ import mezz.jei.input.mouse.IUserInputHandler;
 import mezz.jei.input.mouse.handlers.CombinedInputHandler;
 import mezz.jei.input.mouse.handlers.ProxyInputHandler;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.awt.*;
 import java.util.Optional;
 import java.util.Set;
 
-import static com.github.vfyjxf.jeiutilities.config.KeyBindings.*;
+import static com.github.vfyjxf.jeiutilities.config.KeyBindings.displayPreview;
+import static com.github.vfyjxf.jeiutilities.config.KeyBindings.isKeyDown;
 import static mezz.jei.gui.overlay.IngredientGrid.INGREDIENT_HEIGHT;
 import static mezz.jei.gui.overlay.IngredientGrid.INGREDIENT_WIDTH;
 
@@ -199,8 +197,9 @@ public class AdvancedBookmarkOverlay extends BookmarkOverlay {
         this.infoUnderMouse = infoUnderMouse;
     }
 
-    public void setRecipeLayout(RecipeLayoutLite recipeLayout) {
+    public void setRecipeLayout(@Nullable RecipeLayoutLite recipeLayout) {
         this.recipeLayout = recipeLayout;
     }
+
 }
 

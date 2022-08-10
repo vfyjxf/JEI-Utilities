@@ -29,7 +29,7 @@ import java.util.Set;
 
 import static com.github.vfyjxf.jeiutilities.jei.JeiUtilitiesPlugin.ingredientListOverlay;
 
-@Mod.EventBusSubscriber(modid = JeiUtilities.MODE_ID, value = Dist.CLIENT)
+@Mod.EventBusSubscriber(modid = JeiUtilities.MOD_ID, value = Dist.CLIENT)
 public class GuiInputEventHandler {
 
     private static final ReflectionUtil reflectionUtil = new ReflectionUtil();
@@ -40,7 +40,7 @@ public class GuiInputEventHandler {
         InputConstants.Key input = InputConstants.getKey(event.getKeyCode(), event.getScanCode());
         boolean shouldNotHandleKey = pressedKeys.contains(input) ||
                 isContainerTextFieldFocused(event.getScreen()) ||
-                ingredientListOverlay.hasKeyboardFocus();
+                (ingredientListOverlay != null && ingredientListOverlay.hasKeyboardFocus());
         if (shouldNotHandleKey) {
             return;
         }
@@ -71,6 +71,11 @@ public class GuiInputEventHandler {
             }
 
         }
+
+        if (KeyBindings.openFilterGui.isActiveAndMatches(input) && JeiUtilitiesPlugin.recipesFilterScreen != null) {
+            Minecraft.getInstance().setScreen(JeiUtilitiesPlugin.recipesFilterScreen);
+        }
+
     }
 
     @SubscribeEvent

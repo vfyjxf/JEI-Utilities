@@ -1,11 +1,16 @@
 package com.github.vfyjxf.jeiutilities.jei;
 
 import com.github.vfyjxf.jeiutilities.JeiUtilities;
+import com.github.vfyjxf.jeiutilities.gui.filter.FilterGhostIngredientHandler;
+import com.github.vfyjxf.jeiutilities.gui.filter.FilterTextContent;
+import com.github.vfyjxf.jeiutilities.gui.filter.GuiFilterProperties;
+import com.github.vfyjxf.jeiutilities.gui.filter.RecipesFilterScreen;
 import com.github.vfyjxf.jeiutilities.gui.history.AdvancedIngredientListGrid;
 import com.github.vfyjxf.jeiutilities.jei.recipe.NamedRecipeInfo;
 import com.github.vfyjxf.jeiutilities.jei.recipe.RecipeInfoHelper;
 import com.github.vfyjxf.jeiutilities.jei.recipe.RecipeInfoRenderer;
 import com.github.vfyjxf.jeiutilities.jei.recipe.UnnamedRecipeInfo;
+import com.github.vfyjxf.jeiutilities.mixin.accessor.IngredientListOverlayAccessor;
 import com.github.vfyjxf.jeiutilities.mixin.accessor.RecipeGuiLogicAccessor;
 import com.github.vfyjxf.jeiutilities.mixin.accessor.RecipeManagerAccessor;
 import com.github.vfyjxf.jeiutilities.mixin.accessor.RecipesGuiAccessor;
@@ -16,11 +21,13 @@ import mezz.jei.api.helpers.IJeiHelpers;
 import mezz.jei.api.helpers.IModIdHelper;
 import mezz.jei.api.recipe.IFocusFactory;
 import mezz.jei.api.recipe.IRecipeManager;
+import mezz.jei.api.registration.IGuiHandlerRegistration;
 import mezz.jei.api.registration.IModIngredientRegistration;
 import mezz.jei.api.runtime.IBookmarkOverlay;
 import mezz.jei.api.runtime.IIngredientListOverlay;
 import mezz.jei.api.runtime.IIngredientManager;
 import mezz.jei.api.runtime.IJeiRuntime;
+import mezz.jei.gui.ghost.GhostIngredientDragManager;
 import mezz.jei.gui.recipes.IRecipeGuiLogic;
 import mezz.jei.gui.recipes.RecipesGui;
 import mezz.jei.ingredients.RegisteredIngredients;
@@ -47,11 +54,13 @@ public class JeiUtilitiesPlugin implements IModPlugin {
     public static IBookmarkOverlay bookmarkOverlay;
     public static RecipesGui recipesGui;
     public static RecipeTransferManager recipeTransferManager;
+    public static GhostIngredientDragManager ghostIngredientDragManager;
     public static AdvancedIngredientListGrid historyGrid;
+    public static RecipesFilterScreen recipesFilterScreen;
 
     @Override
     public @NotNull ResourceLocation getPluginUid() {
-        return new ResourceLocation(JeiUtilities.MODE_ID, "jei");
+        return new ResourceLocation(JeiUtilities.MOD_ID, "jei");
     }
 
     @Override
@@ -62,6 +71,8 @@ public class JeiUtilitiesPlugin implements IModPlugin {
         logic = ((RecipesGuiAccessor) recipesGui).getLogic();
         registeredIngredients = ((RecipeGuiLogicAccessor) logic).getRegisteredIngredients();
         recipeTransferManager = ((RecipesGuiAccessor) recipesGui).getRecipeTransferManager();
+        ghostIngredientDragManager = ((IngredientListOverlayAccessor)ingredientListOverlay).getGhostIngredientDragManager();
+        recipesFilterScreen = new RecipesFilterScreen(new FilterTextContent(), recipeManager);
     }
 
     @SuppressWarnings("unchecked")
@@ -69,6 +80,12 @@ public class JeiUtilitiesPlugin implements IModPlugin {
     public void registerIngredients(@NotNull IModIngredientRegistration registration) {
         registration.register(NamedRecipeInfo.NAMED_RECIPE_INFO, Collections.emptyList(), RecipeInfoHelper.NamedRecipeInfoHelper, RecipeInfoRenderer.RECIPE_INFO_RENDERER);
         registration.register(UnnamedRecipeInfo.UNNAMED_RECIPE_INFO, Collections.emptyList(), RecipeInfoHelper.UnnamedRecipeInfoHelper, RecipeInfoRenderer.RECIPE_INFO_RENDERER);
+    }
+
+    @Override
+    public void registerGuiHandlers(@NotNull IGuiHandlerRegistration registration) {
+        registration.addGuiScreenHandler(RecipesFilterScreen.class, GuiFilterProperties::create);
+        registration.addGhostIngredientHandler(RecipesFilterScreen.class, new FilterGhostIngredientHandler());
     }
 
     /**

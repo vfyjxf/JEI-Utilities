@@ -5,6 +5,7 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.ClientRegistry;
 import net.minecraftforge.client.settings.KeyConflictContext;
+import net.minecraftforge.client.settings.KeyModifier;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.Collection;
@@ -15,6 +16,7 @@ public final class KeyBindings {
     public static final KeyMapping displayPreview;
     public static final List<KeyMapping> transferRecipe;
     public static final KeyMapping transferRecipeMax;
+    public static final KeyMapping openFilterGui;
 
     private static final List<KeyMapping> allBindings;
 
@@ -25,7 +27,8 @@ public final class KeyBindings {
                 displayPreview = new KeyMapping("key.jeiutilities.displayPreview", KeyConflictContext.GUI, getKey(GLFW.GLFW_KEY_LEFT_CONTROL), "key.jeiutilities.category"),
                 transferRecipe1 = new KeyMapping("key.jeiutilities.transferRecipe", KeyConflictContext.GUI, getKey(GLFW.GLFW_KEY_W), "key.jeiutilities.category"),
 //                transferRecipe2 = new KeyMapping("key.jeiutilities.transferRecipe", KeyConflictContext.GUI, InputConstants.Type.MOUSE, InputConstants.MOUSE_BUTTON_LEFT, "key.jeiutilities.category"),
-                transferRecipeMax = new KeyMapping("key.jeiutilities.transferRecipeMax", KeyConflictContext.GUI, getKey(GLFW.GLFW_KEY_T), "key.jeiutilities.category")
+                transferRecipeMax = new KeyMapping("key.jeiutilities.transferRecipeMax", KeyConflictContext.GUI, getKey(GLFW.GLFW_KEY_T), "key.jeiutilities.category"),
+                openFilterGui = new KeyMapping("key.jeiutilities.openFilterGui", KeyConflictContext.GUI, KeyModifier.CONTROL, getKey(GLFW.GLFW_KEY_F), "key.jeiutilities.category")
         );
 
 //        transferRecipe = List.of(transferRecipe1, transferRecipe2);

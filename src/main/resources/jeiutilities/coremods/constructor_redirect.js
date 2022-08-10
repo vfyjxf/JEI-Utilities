@@ -71,7 +71,7 @@ function initializeCoreMod() {
             }, 'transformer': function (method) {
                 transConstructToFactory(method,
                     'mezz/jei/input/mouse/handlers/BookmarkInputHandler',
-                    'com/github/vfyjxf/jeiutilities/gui/input/RecipeBookmarkInputHandler',
+                    'com/github/vfyjxf/jeiutilities/gui/input/handler/RecipeBookmarkInputHandler',
                     'create',
                     '(Lmezz/jei/input/CombinedRecipeFocusSource;Lmezz/jei/bookmarks/BookmarkList;)Lmezz/jei/input/mouse/IUserInputHandler;'
                 )
@@ -87,7 +87,7 @@ function initializeCoreMod() {
             }, 'transformer': function (method) {
                 transConstructToFactory(method,
                     'mezz/jei/input/mouse/handlers/FocusInputHandler',
-                    'com/github/vfyjxf/jeiutilities/gui/input/ExtendedFocusInputHandler',
+                    'com/github/vfyjxf/jeiutilities/gui/input/handler/ExtendedFocusInputHandler',
                     'create',
                     '(Lmezz/jei/input/CombinedRecipeFocusSource;Lmezz/jei/gui/recipes/RecipesGui;)Lmezz/jei/input/mouse/IUserInputHandler;'
                 )

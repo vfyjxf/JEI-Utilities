@@ -16,10 +16,10 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-@Mod(JeiUtilities.MODE_ID)
+@Mod(JeiUtilities.MOD_ID)
 public class JeiUtilities {
 
-    public static final String MODE_ID = "jeiutilities";
+    public static final String MOD_ID = "jeiutilities";
     public static final Logger logger = LogManager.getLogger("JeiUtilities");
 
     public JeiUtilities() {

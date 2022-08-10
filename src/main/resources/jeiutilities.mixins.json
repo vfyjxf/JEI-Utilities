@@ -4,13 +4,15 @@
   "package": "com.github.vfyjxf.jeiutilities.mixin",
   "compatibilityLevel": "JAVA_17",
   "client": [
+    "accessor.BookmarkOverlayAccessor",
+    "accessor.IngredientGridAccessor",
+    "accessor.IngredientListOverlayAccessor",
     "accessor.RecipeGuiLogicAccessor",
+    "accessor.RecipeLayoutAccessor",
+    "accessor.RecipeLayoutBuilderAccessor",
     "accessor.RecipeManagerAccessor",
     "accessor.RecipeManagerInternalAccessor",
     "accessor.RecipesGuiAccessor",
-    "accessor.BookmarkOverlayAccessor",
-    "accessor.IngredientGridAccessor",
-    "accessor.RecipeLayoutBuilderAccessor",
-    "accessor.RecipeLayoutAccessor"
+    "accessor.GhostIngredientDragManagerAccessor"
   ]
 }

@@ -1,4 +1,4 @@
-package com.github.vfyjxf.jeiutilities.gui.input;
+package com.github.vfyjxf.jeiutilities.gui.input.handler;
 
 import com.github.vfyjxf.jeiutilities.config.JeiUtilitiesConfig;
 import com.github.vfyjxf.jeiutilities.config.RecordMode;

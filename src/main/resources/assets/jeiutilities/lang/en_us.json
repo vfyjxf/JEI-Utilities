@@ -1,5 +1,5 @@
 {
-  "key.jeiutilities.category": "JeiUtilities",
+  "key.jeiutilities.category": "Jei Utilities",
   "key.jeiutilities.displayPreview": "Display Recipe Preview",
   "key.jeiutilities.transferRecipe": "Transfer Recipe",
   "key.jeiutilities.transferRecipeMax": "Transfer Recipe(Max)",
@@ -10,5 +10,18 @@
   "jeiutilities.tooltip.recording.information_1": "Hold down the %s to display the recipe preview.",
   "jeiutilities.button.name.disable": "Disable",
   "jeiutilities.button.name.enable": "Enable",
-  "jeiutilities.button.name.restricted": "Restricted"
+  "jeiutilities.button.name.restricted": "Restricted",
+  "key.jeiutilities.openFilterGui": "Open Recipe Filter Gui",
+  "jeiutilities.gui.tooltip.focus.title": "Focus Ingredient",
+  "jeiutilities.gui.tooltip.focus.description1": "Ingredient of current filter focus.",
+  "jeiutilities.gui.tooltip.focus.description2": "It is used for preliminary filtering of recipes, equivalently you look up recipes through it.",
+  "jeiutilities.gui.tooltip.focus.description3": "Use the button next to it to set it as an output or an input.",
+  "jeiutilities.gui.tooltip.button.focus.title": "Focus Setting",
+  "jeiutilities.gui.tooltip.button.focus.description1": "Current Mode:%s",
+  "jeiutilities.gui.tooltip.button.focus.mode.ingredient": "Ingredient",
+  "jeiutilities.gui.tooltip.button.focus.mode.output": "Output",
+  "jeiutilities.gui.tooltip.button.filter.title": "Filter Setting",
+  "jeiutilities.gui.tooltip.button.filter.description1": "Current matched value:%s",
+  "jeiutilities.gui.tooltip.button.filter.mode.ingredients": "Recipe Ingredients",
+  "jeiutilities.gui.tooltip.button.filter.mode.output": "Recipe Output"
 }

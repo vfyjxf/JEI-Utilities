@@ -33,6 +33,9 @@ public class JeiUtilitiesConfig {
         private final ForgeConfigSpec.BooleanValue adaptiveRecipePreview;
         private final ForgeConfigSpec.DoubleValue recipePreviewScaling;
 
+        private final ForgeConfigSpec.BooleanValue enableRecipeFilter;
+        private final ForgeConfigSpec.IntValue maxFilterGuiHeight;
+
         public ClientConfig(ForgeConfigSpec.Builder builder) {
             builder.push("history-settings");
             {
@@ -62,6 +65,13 @@ public class JeiUtilitiesConfig {
             {
                 adaptiveRecipePreview = builder.comment("If true, then the recipe preview will automatically select the appropriate scaling based on the screen size.").define("AdaptiveRecipePreview", true);
                 recipePreviewScaling = builder.comment("The scaling of the recipe preview.It is only used when adaptiveRecipePreview is false.").defineInRange("RecipePreviewScaling", 0.8F, 0.0F, 5.0F);
+            }
+            builder.pop();
+
+            builder.push("filter-settings");
+            {
+                enableRecipeFilter = builder.comment("Enable recipe filter").define("EnableRecipeFilter", true);
+                maxFilterGuiHeight = builder.comment("Maximum height of the recipe filter GUI").defineInRange("MaxFilterGUiHeight", 414, 195, Integer.MAX_VALUE);
             }
             builder.pop();
         }
@@ -122,6 +132,14 @@ public class JeiUtilitiesConfig {
 
     public static double getRecipePreviewScaling() {
         return CLIENT_CONFIG.recipePreviewScaling.get();
+    }
+
+    public static boolean getEnableRecipeFilter() {
+        return CLIENT_CONFIG.enableRecipeFilter.get();
+    }
+
+    public static int getMaxFilterGUiHeight() {
+        return CLIENT_CONFIG.maxFilterGuiHeight.get();
     }
 
     public static void setRecordMode(RecordMode mode) {

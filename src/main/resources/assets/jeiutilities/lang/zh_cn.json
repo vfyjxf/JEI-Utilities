@@ -1,4 +1,5 @@
-{  "key.jeiutilities.category": "JeiUtilities",
+{
+  "key.jeiutilities.category": "Jei Utilities",
   "key.jeiutilities.displayPreview": "显示配方预览",
   "key.jeiutilities.transferRecipe": "转移配方(单个)",
   "key.jeiutilities.transferRecipeMax": "转移配方(最大)",
@@ -9,6 +10,18 @@
   "jeiutilities.tooltip.recording.information_1": "按住%s键来显示配方预览。",
   "jeiutilities.button.name.disable": "关闭配方记录",
   "jeiutilities.button.name.enable": "开启配方记录",
-  "jeiutilities.button.name.restricted": "限制模式"
-
+  "jeiutilities.button.name.restricted": "限制模式",
+  "key.jeiutilities.openFilterGui": "打开配方过滤器界面",
+  "jeiutilities.gui.tooltip.focus.title": "聚焦中的材料",
+  "jeiutilities.gui.tooltip.focus.description1": "过滤器当前聚焦的材料。",
+  "jeiutilities.gui.tooltip.focus.description2": "它被用于初步过滤配方，等价于通过它查找配方。",
+  "jeiutilities.gui.tooltip.focus.description3": "通过它旁边的按钮将它设置为配方的输出还是输入。",
+  "jeiutilities.gui.tooltip.button.focus.title": "聚焦设置",
+  "jeiutilities.gui.tooltip.button.focus.description1": "当前模式：%s",
+  "jeiutilities.gui.tooltip.button.focus.mode.ingredient": "材料",
+  "jeiutilities.gui.tooltip.button.focus.mode.output": "输出",
+  "jeiutilities.gui.tooltip.button.filter.title": "过滤设置",
+  "jeiutilities.gui.tooltip.button.filter.description1": "当前被匹配的值：%s",
+  "jeiutilities.gui.tooltip.button.filter.mode.ingredients": "配方材料",
+  "jeiutilities.gui.tooltip.button.filter.mode.output": "配方输出"
 }
