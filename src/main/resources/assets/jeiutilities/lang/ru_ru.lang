@@ -1,7 +1,14 @@
 jeiutilities.tooltip.recording=Конфигурация записи рецепта
 jeiutilities.tooltip.recording.mode=Текущий режим: %s
 jeiutilities.tooltip.recording.description.restricted=Рецепт откроется из истории при нажатой клавише Shift.
+jeiutilities.tooltip.recording.description.enable=Рецепты не записываются и не открываются при нажатии Shift.
+jeiutilities.tooltip.recording.information_1=Удерживайте нажатой клавишу %s, чтобы отобразить предварительный просмотр рецепта.
 
-jeiutilities.button.name.disable=Отключить
-jeiutilities.button.name.enable=Включить
+jeiutilities.button.name.disable=Отключено
+jeiutilities.button.name.enable=Включено
 jeiutilities.button.name.restricted=Ограничено
+
+key.jeiutilities.displayRecipe=Показать предварительный просмотр рецепта
+key.jeiutilities.pickBookmark=Поднять закладку
+key.jeiutilities.transferRecipe=Рецепт передачи(Одиночный)
+key.jeiutilities.transferRecipeMax=Рецепт передачи(MAX)
