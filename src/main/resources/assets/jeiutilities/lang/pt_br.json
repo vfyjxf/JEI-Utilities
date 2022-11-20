@@ -1,0 +1,14 @@
+jeiutilities.tooltip.recording=Configuração de registro de receita
+jeiutilities.tooltip.recording.mode=Modo atual : %s
+jeiutilities.tooltip.recording.description.restricted=Abra uma receita gravada ou marque uma receita enquanto mantém pressionada a tecla Shift.
+jeiutilities.tooltip.recording.description.enable=As receitas não são gravadas ou abertas quando a tecla Shift é pressionada.
+jeiutilities.tooltip.recording.information_1=Mantenha pressionada a tecla %s para exibir a visualização da receita.
+
+jeiutilities.button.name.disable=Desativar
+jeiutilities.button.name.enable=Ativar
+jeiutilities.button.name.restricted=Restrito
+
+key.jeiutilities.displayRecipe=Exibir visualização da receita
+key.jeiutilities.pickBookmark=Pegar marcador
+key.jeiutilities.transferRecipe=Receita de Transferência (Individual)
+key.jeiutilities.transferRecipeMax=Receita de transferência (MAX)
