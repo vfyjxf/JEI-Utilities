@@ -40,12 +40,13 @@ public class RecipeInfo<R, I> {
      */
     private final IRecipeWrapper recipeWrapper;
 
-    public static RecipeInfo create(@Nonnull Object ingredient,
-                                          @Nonnull Object result,
-                                          String recipeCategoryUid,
-                                          int recipeIndex,
-                                          boolean isInputMode,
-                                          @Nonnull IRecipeWrapper recipeWrapper
+    public static RecipeInfo create(
+            @Nonnull Object ingredient,
+            @Nonnull Object result,
+            String recipeCategoryUid,
+            int recipeIndex,
+            boolean isInputMode,
+            @Nonnull IRecipeWrapper recipeWrapper
     ) {
         if (recipeWrapper instanceof ICraftingRecipeWrapper) {
             ICraftingRecipeWrapper craftingWrapper = (ICraftingRecipeWrapper) recipeWrapper;

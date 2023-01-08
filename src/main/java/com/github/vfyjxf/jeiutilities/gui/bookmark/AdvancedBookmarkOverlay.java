@@ -3,7 +3,7 @@ package com.github.vfyjxf.jeiutilities.gui.bookmark;
 import com.github.vfyjxf.jeiutilities.config.JeiUtilitiesConfig;
 import com.github.vfyjxf.jeiutilities.config.KeyBindings;
 import com.github.vfyjxf.jeiutilities.gui.common.GuiInputHandler;
-import com.github.vfyjxf.jeiutilities.gui.recipe.RecipeLayoutLite;
+import com.github.vfyjxf.jeiutilities.gui.recipe.RecipePreviewWidget;
 import com.github.vfyjxf.jeiutilities.jei.ingredient.RecipeInfo;
 import mezz.jei.api.ingredients.IIngredientRenderer;
 import mezz.jei.bookmarks.BookmarkList;
@@ -35,7 +35,7 @@ public class AdvancedBookmarkOverlay extends BookmarkOverlay {
     private final BookmarkInputHandler inputHandler;
 
     private RecipeInfo<?, ?> infoUnderMouse;
-    private RecipeLayoutLite recipeLayout;
+    private RecipePreviewWidget recipeLayout;
 
     public static BookmarkOverlay create(BookmarkList bookmarkList, GuiHelper guiHelper, GuiScreenHelper guiScreenHelper) {
         if (JeiUtilitiesConfig.getRecordRecipes()) {
@@ -86,13 +86,13 @@ public class AdvancedBookmarkOverlay extends BookmarkOverlay {
             if (ingredientUnderMouse instanceof RecipeInfo) {
                 RecipeInfo recipeInfo = (RecipeInfo) ingredientUnderMouse;
                 shouldRenderRecipe = true;
-                RecipeLayoutLite recipeLayout;
+                RecipePreviewWidget recipeLayout;
                 if (this.infoUnderMouse == recipeInfo) {
                     recipeLayout = this.recipeLayout;
                 } else {
                     this.infoUnderMouse = recipeInfo;
 
-                    recipeLayout = RecipeLayoutLite.createLayout(recipeInfo, mouseX, mouseY);
+                    recipeLayout = RecipePreviewWidget.createLayout(recipeInfo, mouseX, mouseY);
                     this.recipeLayout = recipeLayout;
                 }
 
@@ -158,7 +158,7 @@ public class AdvancedBookmarkOverlay extends BookmarkOverlay {
         return infoUnderMouse;
     }
 
-    public RecipeLayoutLite getRecipeLayout() {
+    public RecipePreviewWidget getRecipeLayout() {
         return recipeLayout;
     }
 
@@ -166,7 +166,7 @@ public class AdvancedBookmarkOverlay extends BookmarkOverlay {
         this.infoUnderMouse = infoUnderMouse;
     }
 
-    public void setRecipeLayout(RecipeLayoutLite recipeLayout) {
+    public void setRecipeLayout(RecipePreviewWidget recipeLayout) {
         this.recipeLayout = recipeLayout;
     }
 

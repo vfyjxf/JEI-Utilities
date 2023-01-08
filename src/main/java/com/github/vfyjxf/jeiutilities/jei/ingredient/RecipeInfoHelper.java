@@ -2,9 +2,13 @@ package com.github.vfyjxf.jeiutilities.jei.ingredient;
 
 import com.github.vfyjxf.jeiutilities.jei.JeiUtilitiesPlugin;
 import mezz.jei.api.ingredients.IIngredientHelper;
+import mezz.jei.api.recipe.IFocus;
+import net.minecraft.item.ItemStack;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.awt.*;
+import java.util.Collection;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class RecipeInfoHelper<T extends RecipeInfo> implements IIngredientHelper<T> {
@@ -64,5 +68,51 @@ public class RecipeInfoHelper<T extends RecipeInfo> implements IIngredientHelper
         return JeiUtilitiesPlugin.ingredientRegistry.getIngredientHelper(ingredient);
     }
 
+    @Nonnull
+    @Override
+    public IFocus<?> translateFocus(@Nonnull IFocus<T> focus, @Nonnull IFocusFactory focusFactory) {
+        IFocus real = focusFactory.createFocus(focus.getMode(), focus.getValue().getResult());
+        return getIngredientHelper(focus.getValue().getResult()).translateFocus(real, focusFactory);
+    }
+
+    @Nonnull
+    @Override
+    public String getDisplayModId(@Nonnull T ingredient) {
+        return getIngredientHelper(ingredient.getResult()).getDisplayModId(ingredient.getResult());
+    }
+
+    @Nonnull
+    @Override
+    public Iterable<Color> getColors(@Nonnull T ingredient) {
+        return getIngredientHelper(ingredient.getResult()).getColors(ingredient.getResult());
+    }
+
+    @Nonnull
+    @Override
+    public ItemStack getCheatItemStack(@Nonnull T ingredient) {
+        return getIngredientHelper(ingredient.getResult()).getCheatItemStack(ingredient.getResult());
+    }
+
+    @Override
+    public boolean isValidIngredient(@Nonnull T ingredient) {
+        return getIngredientHelper(ingredient.getResult()).isValidIngredient(ingredient.getResult());
+    }
+
+    @Override
+    public boolean isIngredientOnServer(@Nonnull T ingredient) {
+        return getIngredientHelper(ingredient.getResult()).isIngredientOnServer(ingredient.getResult());
+    }
+
+    @Nonnull
+    @Override
+    public Collection<String> getOreDictNames(@Nonnull T ingredient) {
+        return getIngredientHelper(ingredient.getResult()).getOreDictNames(ingredient.getResult());
+    }
+
+    @Nonnull
+    @Override
+    public Collection<String> getCreativeTabNames(@Nonnull T ingredient) {
+        return getIngredientHelper(ingredient.getResult()).getCreativeTabNames(ingredient.getResult());
+    }
 }
 

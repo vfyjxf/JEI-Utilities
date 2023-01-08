@@ -2,7 +2,7 @@ package com.github.vfyjxf.jeiutilities.gui.common;
 
 import com.github.vfyjxf.jeiutilities.config.KeyBindings;
 import com.github.vfyjxf.jeiutilities.gui.bookmark.AdvancedBookmarkOverlay;
-import com.github.vfyjxf.jeiutilities.gui.recipe.RecipeLayoutLite;
+import com.github.vfyjxf.jeiutilities.gui.recipe.RecipePreviewWidget;
 import com.github.vfyjxf.jeiutilities.jei.JeiUtilitiesPlugin;
 import com.github.vfyjxf.jeiutilities.jei.ingredient.RecipeInfo;
 import it.unimi.dsi.fastutil.ints.IntArraySet;
@@ -59,7 +59,7 @@ public class GuiInputHandler {
         boolean isTransferRecipe = KeyBindings.isKeyDown(KeyBindings.transferRecipe);
         boolean isTransferRecipeMax = KeyBindings.isKeyDown(KeyBindings.transferRecipeMax);
         if (isTransferRecipe || isTransferRecipeMax) {
-            RecipeLayoutLite recipeLayout = getRecipeLayout();
+            RecipePreviewWidget recipeLayout = getRecipeLayout();
             if (recipeLayout != null) {
                 Minecraft mc = event.getGui().mc;
                 if (mc == null) {
@@ -78,7 +78,7 @@ public class GuiInputHandler {
         }
     }
 
-    private RecipeLayoutLite getRecipeLayout() {
+    private RecipePreviewWidget getRecipeLayout() {
         if (JeiUtilitiesPlugin.bookmarkOverlay instanceof AdvancedBookmarkOverlay) {
             AdvancedBookmarkOverlay bookmarkOverlay = (AdvancedBookmarkOverlay) JeiUtilitiesPlugin.bookmarkOverlay;
             Object ingredient = bookmarkOverlay.getIngredientUnderMouse();
@@ -87,7 +87,7 @@ public class GuiInputHandler {
                 if (recipeInfo == bookmarkOverlay.getInfoUnderMouse()) {
                     return bookmarkOverlay.getRecipeLayout();
                 } else {
-                    RecipeLayoutLite recipeLayout = RecipeLayoutLite.createLayout(recipeInfo, MouseHelper.getX(), MouseHelper.getY());
+                    RecipePreviewWidget recipeLayout = RecipePreviewWidget.createLayout(recipeInfo, MouseHelper.getX(), MouseHelper.getY());
                     if (recipeLayout != null) {
                         bookmarkOverlay.setRecipeLayout(recipeLayout);
                         bookmarkOverlay.setInfoUnderMouse(recipeInfo);

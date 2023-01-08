@@ -48,7 +48,7 @@ import static com.github.vfyjxf.jeiutilities.config.JeiUtilitiesConfig.isAdaptiv
  * A lite version of {@link RecipeLayout}, used to display recipes in the bookmark area.
  * Base on the {@link RecipeLayout}, some changes were made to display the recipe more concisely.
  */
-public class RecipeLayoutLite implements IRecipeLayoutDrawable {
+public class RecipePreviewWidget implements IRecipeLayoutDrawable {
 
     private static final int RECIPE_BORDER_PADDING = 4;
 
@@ -70,14 +70,14 @@ public class RecipeLayoutLite implements IRecipeLayoutDrawable {
 
     @SuppressWarnings("rawtypes")
     @Nullable
-    public static <T extends IRecipeWrapper> RecipeLayoutLite create(
+    public static <T extends IRecipeWrapper> RecipePreviewWidget create(
             IRecipeCategory<T> recipeCategory,
             T recipeWrapper,
             @Nullable IFocus focus,
             int posX,
             int posY
     ) {
-        RecipeLayoutLite recipeLayout = new RecipeLayoutLite(recipeCategory, recipeWrapper, focus, posX, posY);
+        RecipePreviewWidget recipeLayout = new RecipePreviewWidget(recipeCategory, recipeWrapper, focus, posX, posY);
         try {
             IIngredients ingredients = new Ingredients();
             recipeWrapper.getIngredients(ingredients);
@@ -90,7 +90,7 @@ public class RecipeLayoutLite implements IRecipeLayoutDrawable {
     }
 
     @SuppressWarnings("unchecked")
-    public static RecipeLayoutLite createLayout(RecipeInfo<?, ?> recipeInfo, int posX, int posY) {
+    public static RecipePreviewWidget createLayout(RecipeInfo<?, ?> recipeInfo, int posX, int posY) {
         return create(JeiUtilitiesPlugin.recipeRegistry.getRecipeCategory(recipeInfo.getRecipeCategoryUid()),
                 recipeInfo.getRecipeWrapper(),
                 new Focus<>(recipeInfo.getMode(),
@@ -98,7 +98,7 @@ public class RecipeLayoutLite implements IRecipeLayoutDrawable {
                 posX, posY);
     }
 
-    private <T extends IRecipeWrapper> RecipeLayoutLite(IRecipeCategory<T> recipeCategory, T recipeWrapper, @Nullable IFocus<?> focus, int posX, int posY) {
+    private <T extends IRecipeWrapper> RecipePreviewWidget(IRecipeCategory<T> recipeCategory, T recipeWrapper, @Nullable IFocus<?> focus, int posX, int posY) {
         ErrorUtil.checkNotNull(recipeCategory, "recipeCategory");
         ErrorUtil.checkNotNull(recipeWrapper, "recipeWrapper");
         if (focus != null) {

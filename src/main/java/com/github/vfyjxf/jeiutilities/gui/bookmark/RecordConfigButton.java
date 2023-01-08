@@ -21,8 +21,8 @@ public class RecordConfigButton extends GuiIconToggleButton {
     private final BookmarkOverlay bookmarkOverlay;
 
     public static RecordConfigButton create(BookmarkOverlay bookmarkOverlay) {
-        IDrawable offIcon = JeiUtilitiesPlugin.guiHelper.drawableBuilder(new ResourceLocation("jeiutilities:textures/gui/icon/bookmark_button.config.disable.png"), 0, 0, 16, 16).setTextureSize(16, 16).build();
-        IDrawable onIcon = JeiUtilitiesPlugin.guiHelper.drawableBuilder(new ResourceLocation("jeiutilities:textures/gui/icon/bookmark_button.config.enable.png"), 0, 0, 16, 16).setTextureSize(16, 16).build();
+        IDrawable offIcon = JeiUtilitiesPlugin.guiHelper.drawableBuilder(new ResourceLocation("jeiutilities:textures/gui/icon/bookmark_button_config_disable.png"), 0, 0, 16, 16).setTextureSize(16, 16).build();
+        IDrawable onIcon = JeiUtilitiesPlugin.guiHelper.drawableBuilder(new ResourceLocation("jeiutilities:textures/gui/icon/bookmark_button_config_enable.png"), 0, 0, 16, 16).setTextureSize(16, 16).build();
         return new RecordConfigButton(offIcon, onIcon, bookmarkOverlay);
     }
 

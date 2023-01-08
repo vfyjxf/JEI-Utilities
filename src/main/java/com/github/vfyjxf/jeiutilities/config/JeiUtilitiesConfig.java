@@ -20,6 +20,7 @@ public class JeiUtilitiesConfig {
     private static File modConfigFile;
 
     private static boolean enableHistory = true;
+    private static int useRows = 2;
     private static boolean matchesNBTs = true;
     private static SplittingMode splittingMode = SplittingMode.DOTTED_LINE;
     private static int backgroundColour = 0xee555555;
@@ -56,11 +57,21 @@ public class JeiUtilitiesConfig {
                     enableHistory,
                     "Enable browsing history function"
             );
+
+            useRows = config.getInt("useRows",
+                    CATEGORY_HISTORY,
+                    useRows,
+                    1,
+                    6,
+                    "Number of rows to use for history"
+            );
+
             matchesNBTs = config.getBoolean("matchesNBTs",
                     CATEGORY_HISTORY,
                     matchesNBTs,
                     "Add item with different nbt to the browsing history"
             );
+
             try {
                 splittingMode = SplittingMode.valueOf(
                         config.getString("splittingMode",
@@ -89,17 +100,21 @@ public class JeiUtilitiesConfig {
                     recordRecipes,
                     "Record current recipe when add ingredient to bookmark in recipe screen"
             );
+
             showRecipeBookmarkReminders = config.getBoolean("showRecipeBookmarkReminders",
                     CATEGORY_BOOKMARK,
                     showRecipeBookmarkReminders,
                     "Display a letter \"R\" in the upper left corner of the recipe bookmark."
             );
+
             recordMode = RecordMode.valueOf(config.getString(
                     "recordMode", CATEGORY_BOOKMARK, recordMode.name(),
                     "Current mode of recording recipes." + "\n"
                             + "Enable: The opposite of RESTRICTED mode" + "\n"
                             + "Disable: Don't record any recipes" + "\n"
-                            + "RESTRICTED: You need to hold down Shift to view the recorded recipe or record recipe."));
+                            + "RESTRICTED: You need to hold down Shift to view the recorded recipe or record recipe.")
+            );
+
         }
         {
             adaptiveRecipePreview = config.getBoolean("adaptiveRecipePreview",
@@ -107,6 +122,7 @@ public class JeiUtilitiesConfig {
                     adaptiveRecipePreview,
                     "If true, then the recipe preview will automatically select the appropriate scaling based on the screen size."
             );
+
             recipePreviewScaling = config.getFloat("recipePreviewScaling",
                     CATEGORY_RENDER,
                     recipePreviewScaling,
@@ -114,6 +130,7 @@ public class JeiUtilitiesConfig {
                     5.0F,
                     "The scaling of the recipe preview.It is only used when adaptiveRecipePreview is false."
             );
+
         }
 
         if (config.hasChanged()) {
@@ -131,6 +148,10 @@ public class JeiUtilitiesConfig {
 
     public static boolean isEnableHistory() {
         return enableHistory;
+    }
+
+    public static int getUseRows() {
+        return useRows;
     }
 
     public static boolean isMatchesNBTs() {
@@ -180,5 +201,4 @@ public class JeiUtilitiesConfig {
             loadConfig();
         }
     }
-
 }

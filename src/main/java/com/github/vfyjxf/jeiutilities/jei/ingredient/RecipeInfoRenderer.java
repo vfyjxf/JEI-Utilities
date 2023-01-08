@@ -43,4 +43,18 @@ public class RecipeInfoRenderer<T extends RecipeInfo> implements IIngredientRend
     public FontRenderer getFontRenderer(@Nonnull Minecraft minecraft, @Nonnull RecipeInfo ingredient) {
         return ingredient.getResultIngredientRenderer().getFontRenderer(minecraft, ingredient.getResult());
     }
+
+    @Nonnull
+    @SuppressWarnings({"unchecked","deprecation"})
+    @Override
+    public List<String> getTooltip(@Nonnull Minecraft minecraft, @Nonnull T ingredient, boolean advanced) {
+        return ingredient.getResultIngredientRenderer().getTooltip(minecraft, ingredient.getResult(), advanced);
+    }
+
+    @Nonnull
+    @SuppressWarnings({"unchecked","deprecation"})
+    @Override
+    public List<String> getTooltip(@Nonnull Minecraft minecraft, @Nonnull T ingredient) {
+        return ingredient.getResultIngredientRenderer().getTooltip(minecraft, ingredient.getResult());
+    }
 }

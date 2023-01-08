@@ -73,18 +73,19 @@ public class AdvancedIngredientGrid extends IngredientGrid {
         final int x = availableArea.x + (availableArea.width - width);
         final int y = availableArea.y + (availableArea.height - height) / 2;
         final int xOffset = x + Math.max(0, (width - ingredientsWidth) / 2);
+        final int useRows = JeiUtilitiesConfig.getUseRows();
 
         this.getArea().setBounds(x, y, width, height);
         this.guiIngredientSlots.clear();
         this.guiHistoryIngredientSlots.clear();
-        this.historySize = columns * USE_ROWS;
+        this.historySize = columns * useRows;
 
         if (rows == 0 || columns < Config.smallestNumColumns) {
             return false;
         }
 
         if (rows >= MIN_ROWS) {
-            rows = rows - USE_ROWS;
+            rows = rows - useRows;
             showHistory = true;
         } else {
             showHistory = false;
@@ -103,7 +104,7 @@ public class AdvancedIngredientGrid extends IngredientGrid {
         }
 
         if (showHistory) {
-            for (int row = 0; row < USE_ROWS; row++) {
+            for (int row = 0; row < useRows; row++) {
                 int y1 = y + ((row + rows) * INGREDIENT_HEIGHT);
                 for (int column = 0; column < columns; column++) {
                     int x1 = xOffset + (column * INGREDIENT_WIDTH);
@@ -133,14 +134,14 @@ public class AdvancedIngredientGrid extends IngredientGrid {
             if (JeiUtilitiesConfig.getSplittingMode() == SplittingMode.DOTTED_LINE) {
                 drawSpillingArea(firstRect.x, firstRect.y,
                         firstRect.width * this.columns,
-                        firstRect.height * USE_ROWS,
+                        firstRect.height * JeiUtilitiesConfig.getUseRows(),
                         JeiUtilitiesConfig.getBackgroundColour()
                 );
             } else {
                 GuiUtils.drawGradientRect(
                         0, firstRect.x, firstRect.y,
                         firstRect.x + firstRect.width * this.columns,
-                        firstRect.y + firstRect.height * USE_ROWS,
+                        firstRect.y + firstRect.height * JeiUtilitiesConfig.getUseRows(),
                         JeiUtilitiesConfig.getBackgroundColour(),
                         JeiUtilitiesConfig.getBackgroundColour()
                 );

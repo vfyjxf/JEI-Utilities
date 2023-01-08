@@ -19,7 +19,12 @@ import static com.github.vfyjxf.jeiutilities.jei.JeiUtilitiesPlugin.recipeRegist
 public class RecipeHelper {
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    public static <V, T> Pair<IRecipeWrapper, Integer> getRecipeWrapperAndIndex(@Nonnull Map<IIngredientType, List<String>> recipeUidMap, @Nonnull String recipeCategoryUid, @Nonnull T recipeOutput, @Nonnull IFocus<V> focus) {
+    public static <V, T> Pair<IRecipeWrapper, Integer> getRecipeWrapperAndIndex(
+            @Nonnull Map<IIngredientType, List<String>> recipeUidMap,
+            @Nonnull String recipeCategoryUid,
+            @Nonnull T recipeOutput,
+            @Nonnull IFocus<V> focus
+    ) {
         IRecipeCategory recipeCategory = recipeRegistry.getRecipeCategory(recipeCategoryUid);
         if (recipeCategory != null) {
             IIngredientHelper<V> ingredientHelper = ingredientRegistry.getIngredientHelper(focus.getValue());
@@ -48,7 +53,12 @@ public class RecipeHelper {
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    public static <V, T> Pair<ICraftingRecipeWrapper, Integer> getCraftingRecipeWrapperAndIndex(@Nonnull ResourceLocation registerName, @Nonnull String recipeCategoryUid, @Nonnull T recipeOutput, @Nonnull IFocus<V> focus) {
+    public static <V, T> Pair<ICraftingRecipeWrapper, Integer> getCraftingRecipeWrapperAndIndex(
+            @Nonnull ResourceLocation registerName,
+            @Nonnull String recipeCategoryUid,
+            @Nonnull T recipeOutput,
+            @Nonnull IFocus<V> focus
+    ) {
         IRecipeCategory recipeCategory = recipeRegistry.getRecipeCategory(recipeCategoryUid);
         if (recipeCategory != null && recipeCategory.getUid().equals(VanillaRecipeCategoryUid.CRAFTING)) {
             IIngredientHelper<V> ingredientHelper = ingredientRegistry.getIngredientHelper(focus.getValue());
