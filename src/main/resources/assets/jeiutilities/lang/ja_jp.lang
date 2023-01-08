@@ -1,0 +1,14 @@
+jeiutilities.tooltip.recording=JEI Utilities
+jeiutilities.tooltip.recording.mode=現在のモード: %s
+jeiutilities.tooltip.recording.description.restricted=Shiftキーを押している場合、レシピ確認が出来る方法で登録する。
+jeiutilities.tooltip.recording.description.enable=Shiftキーを押していない場合、レシピ確認が出来る方法で登録する。
+jeiutilities.tooltip.recording.information_1=%sキーを長押ししながら、レシピ確認が出来る方法で登録した物を表示する。
+
+jeiutilities.button.name.disable=無効化
+jeiutilities.button.name.enable=有効化
+jeiutilities.button.name.restricted=制限付き
+
+key.jeiutilities.displayRecipe=レシピのプレビューを表示
+key.jeiutilities.pickBookmark=ブックマークを掴む
+key.jeiutilities.transferRecipe=レシピを移動(Single)
+key.jeiutilities.transferRecipeMax=レシピを移動(MAX)
