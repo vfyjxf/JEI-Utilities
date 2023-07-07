@@ -222,7 +222,7 @@ public class BookmarkInputHandler {
                     }
 
                     showRecipe(new Focus<>(recipeInfo.getMode(), recipeInfo.getIngredient()));
-                    JeiUtilitiesPlugin.getGrid().addHistoryIngredient(recipeInfo.getResult());
+                    JeiUtilitiesPlugin.getGrid().ifPresent(grid -> grid.addHistoryIngredient(recipeInfo.getResult()));
                     IngredientLookupState state = ReflectionUtils.getFieldValue(RecipeGuiLogic.class, logic, "state");
                     if (state != null) {
                         state.setRecipeCategoryIndex(getRecipeCategoryIndex(state, recipeInfo.getRecipeCategoryUid()));
@@ -267,7 +267,7 @@ public class BookmarkInputHandler {
                         }
 
                         showRecipe(new Focus<>(recipeInfo.getMode(), recipeInfo.getIngredient()));
-                        JeiUtilitiesPlugin.getGrid().addHistoryIngredient(recipeInfo.getResult());
+                        JeiUtilitiesPlugin.getGrid().ifPresent(grid -> grid.addHistoryIngredient(recipeInfo.getResult()));
                         IngredientLookupState state = ReflectionUtils.getFieldValue(RecipeGuiLogic.class, logic, "state");
                         if (state != null) {
                             state.setRecipeCategoryIndex(getRecipeCategoryIndex(state, recipeInfo.getRecipeCategoryUid()));

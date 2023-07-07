@@ -116,7 +116,18 @@ public class JeiUtilitiesClassTransformer implements IClassTransformer {
             classNode.accept(classWriter);
             return classWriter.toByteArray();
         }
-
+        /*
+        if ("mezz/jei/startup/ForgeModIdHelper".equals(internalName)){
+            ClassNode classNode = new ClassNode();
+            ClassReader classReader = new ClassReader(basicClass);
+            classReader.accept(classNode, 0);
+            for (MethodNode methodNode : classNode.methods) {
+                if ("addModNameToIngredientTooltip".equals(methodNode.name)){
+                    JEIUtilities.logger.info("Transforming : " + internalName + ";" + methodNode.name + methodNode.desc);
+                }
+            }
+        }
+        */
         return basicClass;
     }
 

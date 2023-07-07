@@ -14,7 +14,7 @@ public final class JeiHooks {
      */
     public static <V> void onSetFocus(IFocus<V> focus) {
         if (JeiUtilitiesConfig.isEnableHistory()) {
-            JeiUtilitiesPlugin.getGrid().addHistoryIngredient(focus.getValue());
+            JeiUtilitiesPlugin.getGrid().ifPresent(grid -> grid.addHistoryIngredient(focus.getValue()));
         }
     }
 

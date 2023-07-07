@@ -55,7 +55,7 @@ public class JeiUtilitiesConfig {
             enableHistory = config.getBoolean("enableHistory",
                     CATEGORY_HISTORY,
                     enableHistory,
-                    "Enable browsing history function"
+                    "Enable browsing history feature"
             );
 
             useRows = config.getInt("useRows",

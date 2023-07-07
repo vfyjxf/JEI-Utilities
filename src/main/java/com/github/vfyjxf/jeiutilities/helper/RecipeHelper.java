@@ -52,19 +52,25 @@ public class RecipeHelper {
         return null;
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    public static <V, T> Pair<ICraftingRecipeWrapper, Integer> getCraftingRecipeWrapperAndIndex(
+    @SuppressWarnings({"unchecked"})
+    public static <V, T,R extends IRecipeWrapper> Pair<ICraftingRecipeWrapper, Integer> getCraftingRecipeWrapperAndIndex(
             @Nonnull ResourceLocation registerName,
             @Nonnull String recipeCategoryUid,
             @Nonnull T recipeOutput,
             @Nonnull IFocus<V> focus
     ) {
-        IRecipeCategory recipeCategory = recipeRegistry.getRecipeCategory(recipeCategoryUid);
+        IRecipeCategory<R> recipeCategory = recipeRegistry.getRecipeCategory(recipeCategoryUid);
         if (recipeCategory != null && recipeCategory.getUid().equals(VanillaRecipeCategoryUid.CRAFTING)) {
             IIngredientHelper<V> ingredientHelper = ingredientRegistry.getIngredientHelper(focus.getValue());
             IFocus<?> translatedFocus = ingredientHelper.translateFocus(focus, Focus::new);
             //In fact, we know that the returned RecipeWrapper instanceof ICraftingRecipeWrapper.
-            List<ICraftingRecipeWrapper> craftingRecipes = recipeRegistry.getRecipeWrappers(recipeCategory, translatedFocus);
+            //OK,it seems to be that not all RecipeWrapper is ICraftingRecipeWrapper.
+            //But we only care ICraftingRecipeWrapper.
+            List<ICraftingRecipeWrapper> craftingRecipes = recipeRegistry.getRecipeWrappers(recipeCategory, translatedFocus)
+                    .stream()
+                    .filter(ICraftingRecipeWrapper.class::isInstance)
+                    .map(ICraftingRecipeWrapper.class::cast)
+                    .collect(Collectors.toList());
 
             List<ICraftingRecipeWrapper> registerNameMatchRecipes = craftingRecipes.parallelStream()
                     .filter(recipe -> registerName.equals(recipe.getRegistryName()))
@@ -132,10 +138,15 @@ public class RecipeHelper {
         List<String> ingredientsUid = new ArrayList<>();
         List<List<V>> ingredientList = ingredients.getInputs(ingredientType);
         for (List<V> ingredientPerSlot : ingredientList) {
-            if (ingredientPerSlot.isEmpty()) {
+            V first = ingredientPerSlot.isEmpty() ? null :
+                    ingredientPerSlot.stream()
+                            .filter(Objects::nonNull)
+                            .findFirst()
+                            .orElse(null);
+            if (first == null) {
                 ingredientsUid.add(RecipeInfo.NONE_MARK);
             } else {
-                ingredientsUid.add(IngredientHelper.getUniqueId(ingredientPerSlot.get(0)));
+                ingredientsUid.add(IngredientHelper.getUniqueId(first));
             }
         }
         return ingredientsUid;

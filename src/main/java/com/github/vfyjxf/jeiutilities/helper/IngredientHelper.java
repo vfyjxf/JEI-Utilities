@@ -1,6 +1,7 @@
 package com.github.vfyjxf.jeiutilities.helper;
 
 import com.github.vfyjxf.jeiutilities.jei.JeiUtilitiesPlugin;
+import com.github.vfyjxf.jeiutilities.jei.ingredient.RecipeInfo;
 import mezz.jei.api.ingredients.IIngredientHelper;
 import mezz.jei.api.ingredients.VanillaTypes;
 import mezz.jei.api.recipe.IIngredientType;
@@ -18,6 +19,8 @@ import static com.github.vfyjxf.jeiutilities.jei.JeiUtilitiesPlugin.ingredientRe
 
 public class IngredientHelper {
     public static <V> String getUniqueId(V ingredient) {
+
+        if (ingredient == null) return RecipeInfo.NONE_MARK;
 
         if (ingredient instanceof ItemStack) {
             return ((ItemStack) ingredient).writeToNBT(new NBTTagCompound()).toString();

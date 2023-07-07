@@ -24,6 +24,7 @@ import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
 import javax.annotation.Nonnull;
 import java.util.Collections;
+import java.util.Optional;
 
 import static net.minecraftforge.fml.common.ObfuscationReflectionHelper.getPrivateValue;
 
@@ -89,8 +90,8 @@ public class JeiUtilitiesPlugin implements IModPlugin {
         registry.register(CraftingRecipeInfo.CRAFTING_RECIPE_INFO, Collections.emptyList(), helper, renderer);
     }
 
-    public static AdvancedIngredientGrid getGrid() {
-        return grid;
+    public static Optional<AdvancedIngredientGrid> getGrid() {
+        return Optional.ofNullable(grid);
     }
 
 }
