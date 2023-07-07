@@ -95,7 +95,6 @@ dependencies {
     //big recipe test
     runtime "curse.maven:extended-crafting-268387:2777071"
     runtime "curse.maven:cucumber-272335:2645867"
-    runtime ""
 //    deobfCompile("zone.rong:mixinbooter:4.2")
 }
 
