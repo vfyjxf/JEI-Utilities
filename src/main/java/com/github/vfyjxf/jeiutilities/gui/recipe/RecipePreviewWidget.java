@@ -168,7 +168,10 @@ public class RecipePreviewWidget implements IRecipeLayoutDrawable {
         int width = background.getWidth() + (2 * RECIPE_BORDER_PADDING);
         int height = background.getHeight() + (2 * RECIPE_BORDER_PADDING);
         checkBounds(minecraft.currentScreen, height);
-        final float scaling = isAdaptiveRecipePreview() ? getScaling(minecraft.currentScreen) : JeiUtilitiesConfig.getRecipePreviewScaling();
+        float scaling = isAdaptiveRecipePreview() ? getScaling(minecraft.currentScreen) : JeiUtilitiesConfig.getRecipePreviewScaling();
+        if (scaling > 1.5F) {
+            scaling = 1.5F;//prevent scaling too much.
+        }
         GlStateManager.pushMatrix();
         GlStateManager.translate(posX * scaling, posY * scaling, 0.0F);
         GlStateManager.scale(scaling, scaling, 1.0F);
