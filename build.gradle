@@ -1,26 +1,18 @@
-buildscript {
-    repositories {
-        mavenCentral()
-        maven {
-            name = "forge"
-            url = "https://maven.minecraftforge.net"
-        }
-        maven {
-            name = "github"
-            url = "https://github.com/juanmuscaria/maven/raw/master"
-        }
-        maven {
-            name = "sponge"
-            url = "https://repo.spongepowered.org/maven"
-        }
-    }
-    dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
-        classpath 'org.spongepowered:mixingradle:0.6-SNAPSHOT'
-    }
+plugins {
+    id 'net.minecraftforge.gradle' version '6.0.+'
+    id 'wtf.gofancy.fancygradle' version '1.1.+'
+    id 'org.spongepowered.mixin' version '0.7.+'
 }
 
-apply plugin: 'net.minecraftforge.gradle.forge'
+fancyGradle {
+    patches {
+        resources
+        coremods
+        codeChickenLib
+        asm
+        mergetool
+    }
+}
 
 version = mod_version
 group = mod_group
@@ -30,37 +22,49 @@ archivesBaseName = mod_archives_name + "-" + mc_version
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
 
 minecraft {
-    version = "1.12.2-14.23.5.2847"
-    mappings = "stable_39"
-    runDir = "run"
-
-    replace '@VERSION@', project.version
-
-    def args = [
-            "-Dfml.coreMods.load=com.github.vfyjxf.jeiutilities.asm.JeiUtilitiesLoadingPlugin",
-            "-Dmixin.hotSwap=true",
-            "-Dmixin.checks.interfaces=true",
-            "-Dmixin.debug.export=true"
-    ]
-
-    clientJvmArgs.addAll(args)
-    serverJvmArgs.addAll(args)
+    mappings channel: 'stable', version: '39-1.12'
+    // accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
+    runs {
+        def args = [
+                "-Dfml.coreMods.load=com.github.vfyjxf.jeiutilities.asm.JeiUtilitiesLoadingPlugin",
+                "-Dmixin.hotSwap=true",
+                "-Dmixin.checks.interfaces=true",
+                "-Dmixin.debug.export=true"
+        ]
+        client {
+            workingDirectory project.file('run')
+            property 'forge.logging.console.level', 'debug'
+            jvmArgs args
+        }
+        /* client only mod doesn't need server
+        server {
+            workingDirectory project.file('run')
+            property 'forge.logging.console.level', 'debug'
+        }
+         */
+    }
 }
 
 processResources {
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    // this will ensure that this task is redone when the versions change.
+    inputs.property "version", project.version
 
+    // replace stuff in mcmod.info, nothing else
     from(sourceSets.main.resources.srcDirs) {
         include 'mcmod.info'
         expand 'version': project.version,
                 'mod_id': mod_id,
                 'mod_name': mod_name,
+                'mod_credits': mod_credits,
                 'mod_author': mod_author,
                 'mod_description': mod_description,
                 'mc_version': mc_version,
                 'mod_version': mod_version,
-                'mod_icon': mod_icon
+                'mod_logo': mod_logo
     }
 
+    // copy everything else except the mcmod.info
     from(sourceSets.main.resources.srcDirs) {
         exclude 'mcmod.info'
     }
@@ -84,42 +88,60 @@ repositories {
     maven {
         name = "CurseMaven"
         url = "https://cursemaven.com"
+        content {
+            includeGroup 'curse.maven'
+        }
     }
     maven {
-        url "https://maven.cleanroommc.com"
+        url 'https://maven.cleanroommc.com'
     }
 }
 
 dependencies {
-    deobfCompile "mezz.jei:jei_${mc_version}:${jei_version}"
+    minecraft 'net.minecraftforge:forge:1.12.2-14.23.5.2860'
+    implementation fg.deobf("mezz.jei:jei_${mc_version}:${jei_version}")
     //big recipe test
-    runtime "curse.maven:extended-crafting-268387:2777071"
-    runtime "curse.maven:cucumber-272335:2645867"
+    runtimeOnly fg.deobf("curse.maven:extended-crafting-268387:2777071")
+    runtimeOnly fg.deobf("curse.maven:cucumber-272335:2645867")
+    implementation fg.deobf("curse.maven:modularui-624243:5153413")
 //    deobfCompile("zone.rong:mixinbooter:4.2")
+
+    //mixin booter
+    annotationProcessor 'org.ow2.asm:asm-debug-all:5.2'
+    annotationProcessor 'com.google.guava:guava:32.1.2-jre'
+    annotationProcessor 'com.google.code.gson:gson:2.8.9'
+
+    implementation('zone.rong:mixinbooter:9.1') {
+        transitive = false
+    }
+    annotationProcessor('zone.rong:mixinbooter:9.1') {
+        transitive = false
+    }
 }
 
-task devJar(type: Jar) {
-    classifier = 'dev'
-    from sourceSets.main.output
-}
-
-task sourcesJar(type: Jar) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
-}
-
-runClient {
-    args '--username', 'developer'
+mixin {
+    add sourceSets.main, 'jeiutilities.refmap.json'
 }
 
 jar {
-    manifest.attributes(
-            'FMLCorePlugin': 'com.github.vfyjxf.jeiutilities.asm.JeiUtilitiesLoadingPlugin',
-            'FMLCorePluginContainsFMLMod': 'true'
-    )
+    manifest {
+        attributes([
+                "Specification-Title"        : "",
+                "Specification-Vendor"       : "examplemodsareus",
+                "Specification-Version"      : "1", // We are version 1 of ourselves
+                "Implementation-Title"       : project.name,
+                "Implementation-Version"     : project.jar.archiveVersion,
+                "Implementation-Vendor"      : "examplemodsareus",
+                "Implementation-Timestamp"   : new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+                'FMLCorePlugin'              : 'com.github.vfyjxf.jeiutilities.asm.JeiUtilitiesLoadingPlugin',
+                'ForceLoadAsMod'             : true,
+                'FMLCorePluginContainsFMLMod': 'true'
+        ])
+    }
 }
 
-artifacts {
-    archives devJar
-    archives sourcesJar
+jar.finalizedBy('reobfJar')
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
 }
