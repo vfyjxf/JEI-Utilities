@@ -102,8 +102,6 @@ dependencies {
     runtimeOnly fg.deobf("curse.maven:cucumber-272335:2645867")
 //    deobfCompile("zone.rong:mixinbooter:4.2")
 
-    implementation fg.deobf("curse.maven:modularui-624243:5153413-sources-5153415")
-
     annotationProcessor 'com.github.bsideup.jabel:jabel-javac-plugin:1.0.0'
     compileOnly('com.github.bsideup.jabel:jabel-javac-plugin:1.0.0') {
         transitive = false
