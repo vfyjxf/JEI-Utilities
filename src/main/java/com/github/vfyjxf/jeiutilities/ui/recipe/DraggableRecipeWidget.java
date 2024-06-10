@@ -1,4 +1,4 @@
-package com.github.vfyjxf.jeiutilities.gui.recipe;
+package com.github.vfyjxf.jeiutilities.ui.recipe;
 
 import mezz.jei.api.gui.IGuiFluidStackGroup;
 import mezz.jei.api.gui.IGuiIngredientGroup;

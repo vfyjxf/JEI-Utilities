@@ -1,10 +1,10 @@
-package com.github.vfyjxf.jeiutilities.gui.bookmark;
+package com.github.vfyjxf.jeiutilities.ui.bookmark;
 
 import com.github.vfyjxf.jeiutilities.config.JeiUtilitiesConfig;
 import com.github.vfyjxf.jeiutilities.config.KeyBindings;
-import com.github.vfyjxf.jeiutilities.gui.common.GuiInputHandler;
-import com.github.vfyjxf.jeiutilities.gui.recipe.RecipePreviewWidget;
 import com.github.vfyjxf.jeiutilities.jei.ingredient.RecipeInfo;
+import com.github.vfyjxf.jeiutilities.ui.common.GuiInputHandler;
+import com.github.vfyjxf.jeiutilities.ui.recipe.RecipePreviewWidget;
 import mezz.jei.api.ingredients.IIngredientRenderer;
 import mezz.jei.bookmarks.BookmarkList;
 import mezz.jei.gui.GuiHelper;
@@ -18,7 +18,7 @@ import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import org.lwjgl.input.Keyboard;
 
 import javax.annotation.Nonnull;
-import java.awt.*;
+import java.awt.Rectangle;
 import java.util.Set;
 
 import static com.github.vfyjxf.jeiutilities.jei.JeiUtilitiesPlugin.ingredientListOverlay;

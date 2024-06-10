@@ -1,6 +1,6 @@
 package com.github.vfyjxf.jeiutilities.config;
 
-import com.github.vfyjxf.jeiutilities.JEIUtilities;
+import com.github.vfyjxf.jeiutilities.JeiUtilities;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraftforge.common.config.ConfigElement;
@@ -27,10 +27,10 @@ public class JeiUtilitiesConfigGuiFactory implements IModGuiFactory {
     public GuiScreen createConfigGui(GuiScreen parentScreen) {
         return new GuiConfig(parentScreen,
                 getConfigElements(),
-                JEIUtilities.MODID,
+                JeiUtilities.MODID,
                 false,
                 false,
-                JEIUtilities.NAME
+                JeiUtilities.NAME
         );
     }
 

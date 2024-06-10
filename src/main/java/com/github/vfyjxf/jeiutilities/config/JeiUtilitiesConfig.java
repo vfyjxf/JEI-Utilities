@@ -1,6 +1,6 @@
 package com.github.vfyjxf.jeiutilities.config;
 
-import com.github.vfyjxf.jeiutilities.JEIUtilities;
+import com.github.vfyjxf.jeiutilities.JeiUtilities;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -9,7 +9,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import java.io.File;
 
-@Mod.EventBusSubscriber(modid = JEIUtilities.MODID)
+@Mod.EventBusSubscriber(modid = JeiUtilities.MODID)
 public class JeiUtilitiesConfig {
 
     private static final String CATEGORY_HISTORY = "history";
@@ -34,9 +34,9 @@ public class JeiUtilitiesConfig {
 
 
     public static void preInit(FMLPreInitializationEvent event) {
-        File configDir = new File(event.getModConfigurationDirectory(), JEIUtilities.MODID);
+        File configDir = new File(event.getModConfigurationDirectory(), JeiUtilities.MODID);
 
-        modConfigFile = new File(configDir, JEIUtilities.MODID + ".cfg");
+        modConfigFile = new File(configDir, JeiUtilities.MODID + ".cfg");
         config = new Configuration(modConfigFile);
 
         loadConfig();
@@ -194,7 +194,7 @@ public class JeiUtilitiesConfig {
 
     @SubscribeEvent
     public static void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent event) {
-        if (event.getModID().equals(JEIUtilities.MODID)) {
+        if (event.getModID().equals(JeiUtilities.MODID)) {
             if (config.hasChanged()) {
                 config.save();
             }

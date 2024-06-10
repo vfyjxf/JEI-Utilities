@@ -1,12 +1,19 @@
 package com.github.vfyjxf.jeiutilities.asm;
 
-import com.github.vfyjxf.jeiutilities.JEIUtilities;
+import com.github.vfyjxf.jeiutilities.JeiUtilities;
 import com.github.vfyjxf.jeiutilities.config.JeiUtilitiesConfig;
 import net.minecraft.launchwrapper.IClassTransformer;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.tree.*;
+import org.objectweb.asm.tree.AbstractInsnNode;
+import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.InsnList;
+import org.objectweb.asm.tree.LabelNode;
+import org.objectweb.asm.tree.MethodInsnNode;
+import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.tree.TypeInsnNode;
+import org.objectweb.asm.tree.VarInsnNode;
 
 @SuppressWarnings("unused")
 public class JeiUtilitiesClassTransformer implements IClassTransformer {
@@ -20,7 +27,7 @@ public class JeiUtilitiesClassTransformer implements IClassTransformer {
                 classReader.accept(classNode, 0);
                 for (MethodNode methodNode : classNode.methods) {
                     if ("show".equals(methodNode.name)) {
-                        JEIUtilities.logger.info("Transforming : " + internalName + ";" + methodNode.name + methodNode.desc);
+                        JeiUtilities.logger.info("Transforming : " + internalName + ";" + methodNode.name + methodNode.desc);
                         AbstractInsnNode target = methodNode.instructions.getFirst();
                         while (target.getOpcode() != Opcodes.RETURN) {
                             target = target.getNext();
@@ -50,7 +57,7 @@ public class JeiUtilitiesClassTransformer implements IClassTransformer {
             classReader.accept(classNode, 0);
             for (MethodNode methodNode : classNode.methods) {
                 if ("start".equals(methodNode.name)) {
-                    JEIUtilities.logger.info("Transforming : " + internalName + ";" + methodNode.name + methodNode.desc);
+                    JeiUtilities.logger.info("Transforming : " + internalName + ";" + methodNode.name + methodNode.desc);
                     //patch create method
                     {
                         AbstractInsnNode target = methodNode.instructions.getFirst();
@@ -70,7 +77,7 @@ public class JeiUtilitiesClassTransformer implements IClassTransformer {
                                 MethodInsnNode methodInsnNode = (MethodInsnNode) node;
                                 if ("mezz/jei/gui/overlay/bookmarks/BookmarkOverlay".equals(methodInsnNode.owner) && "<init>".equals(methodInsnNode.name)) {
                                     methodInsnNode.setOpcode(Opcodes.INVOKESTATIC);
-                                    methodInsnNode.owner = "com/github/vfyjxf/jeiutilities/gui/bookmark/AdvancedBookmarkOverlay";
+                                    methodInsnNode.owner = "com/github/vfyjxf/jeiutilities/ui/bookmark/AdvancedBookmarkOverlay";
                                     methodInsnNode.name = "create";
                                     methodInsnNode.desc = "(Lmezz/jei/bookmarks/BookmarkList;Lmezz/jei/gui/GuiHelper;Lmezz/jei/gui/GuiScreenHelper;)Lmezz/jei/gui/overlay/bookmarks/BookmarkOverlay;";
                                 }
@@ -123,7 +130,7 @@ public class JeiUtilitiesClassTransformer implements IClassTransformer {
             classReader.accept(classNode, 0);
             for (MethodNode methodNode : classNode.methods) {
                 if ("addModNameToIngredientTooltip".equals(methodNode.name)){
-                    JEIUtilities.logger.info("Transforming : " + internalName + ";" + methodNode.name + methodNode.desc);
+                    JeiUtilities.logger.info("Transforming : " + internalName + ";" + methodNode.name + methodNode.desc);
                 }
             }
         }

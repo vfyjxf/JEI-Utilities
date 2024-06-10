@@ -1,10 +1,10 @@
-package com.github.vfyjxf.jeiutilities.gui.common;
+package com.github.vfyjxf.jeiutilities.ui.common;
 
 import com.github.vfyjxf.jeiutilities.config.KeyBindings;
-import com.github.vfyjxf.jeiutilities.gui.bookmark.AdvancedBookmarkOverlay;
-import com.github.vfyjxf.jeiutilities.gui.recipe.RecipePreviewWidget;
 import com.github.vfyjxf.jeiutilities.jei.JeiUtilitiesPlugin;
 import com.github.vfyjxf.jeiutilities.jei.ingredient.RecipeInfo;
+import com.github.vfyjxf.jeiutilities.ui.bookmark.AdvancedBookmarkOverlay;
+import com.github.vfyjxf.jeiutilities.ui.recipe.RecipePreviewWidget;
 import it.unimi.dsi.fastutil.ints.IntArraySet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import mezz.jei.api.recipe.transfer.IRecipeTransferError;

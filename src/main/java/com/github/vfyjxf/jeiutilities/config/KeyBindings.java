@@ -1,6 +1,6 @@
 package com.github.vfyjxf.jeiutilities.config;
 
-import com.github.vfyjxf.jeiutilities.JEIUtilities;
+import com.github.vfyjxf.jeiutilities.JeiUtilities;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraftforge.client.settings.KeyConflictContext;
 import net.minecraftforge.client.settings.KeyModifier;
@@ -11,7 +11,7 @@ import org.lwjgl.input.Keyboard;
 
 import javax.annotation.Nonnull;
 
-@Mod.EventBusSubscriber(modid = JEIUtilities.MODID, value = Side.CLIENT)
+@Mod.EventBusSubscriber(modid = JeiUtilities.MODID, value = Side.CLIENT)
 public final class KeyBindings {
 
     public static final KeyBinding displayRecipe;
@@ -20,10 +20,10 @@ public final class KeyBindings {
     public static final KeyBinding transferRecipeMax;
 
     static {
-        displayRecipe = new KeyBinding("key.jeiutilities.displayRecipe", KeyConflictContext.GUI, Keyboard.KEY_LCONTROL, JEIUtilities.NAME);
-        pickBookmark = new KeyBinding("key.jeiutilities.pickBookmark", KeyConflictContext.GUI, -98, JEIUtilities.NAME);
-        transferRecipe = new KeyBinding("key.jeiutilities.transferRecipe", KeyConflictContext.GUI, KeyModifier.CONTROL, Keyboard.KEY_W, JEIUtilities.NAME);
-        transferRecipeMax = new KeyBinding("key.jeiutilities.transferRecipeMax", KeyConflictContext.GUI, KeyModifier.CONTROL, Keyboard.KEY_T, JEIUtilities.NAME);
+        displayRecipe = new KeyBinding("key.jeiutilities.displayRecipe", KeyConflictContext.GUI, Keyboard.KEY_LCONTROL, JeiUtilities.NAME);
+        pickBookmark = new KeyBinding("key.jeiutilities.pickBookmark", KeyConflictContext.GUI, -98, JeiUtilities.NAME);
+        transferRecipe = new KeyBinding("key.jeiutilities.transferRecipe", KeyConflictContext.GUI, KeyModifier.CONTROL, Keyboard.KEY_W, JeiUtilities.NAME);
+        transferRecipeMax = new KeyBinding("key.jeiutilities.transferRecipeMax", KeyConflictContext.GUI, KeyModifier.CONTROL, Keyboard.KEY_T, JeiUtilities.NAME);
     }
 
     public static void registerKeyBindings() {

@@ -8,7 +8,7 @@
   "updateUrl": "",
   "authorList": ["${mod_author}"],
   "credits": "",
-  "logoFile": "${mod_icon}",
+  "logoFile": "${mod_logo}",
   "screenshots": [],
   "dependencies": []
 }]

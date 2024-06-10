@@ -1,14 +1,18 @@
 package com.github.vfyjxf.jeiutilities.jei;
 
 import com.github.vfyjxf.jeiutilities.config.JeiUtilitiesConfig;
-import com.github.vfyjxf.jeiutilities.gui.bookmark.AdvancedBookmarkOverlay;
-import com.github.vfyjxf.jeiutilities.gui.history.AdvancedIngredientGrid;
 import com.github.vfyjxf.jeiutilities.jei.ingredient.CraftingRecipeInfo;
 import com.github.vfyjxf.jeiutilities.jei.ingredient.RecipeInfo;
 import com.github.vfyjxf.jeiutilities.jei.ingredient.RecipeInfoHelper;
 import com.github.vfyjxf.jeiutilities.jei.ingredient.RecipeInfoRenderer;
+import com.github.vfyjxf.jeiutilities.ui.history.AdvancedIngredientGrid;
 import mezz.jei.Internal;
-import mezz.jei.api.*;
+import mezz.jei.api.IGuiHelper;
+import mezz.jei.api.IJeiRuntime;
+import mezz.jei.api.IModPlugin;
+import mezz.jei.api.IModRegistry;
+import mezz.jei.api.IRecipeRegistry;
+import mezz.jei.api.JEIPlugin;
 import mezz.jei.api.ingredients.IModIngredientRegistration;
 import mezz.jei.bookmarks.BookmarkList;
 import mezz.jei.gui.overlay.IngredientGrid;

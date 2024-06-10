@@ -1,4 +1,4 @@
-package com.github.vfyjxf.jeiutilities.gui.bookmark;
+package com.github.vfyjxf.jeiutilities.ui.bookmark;
 
 import com.github.vfyjxf.jeiutilities.config.JeiUtilitiesConfig;
 import com.github.vfyjxf.jeiutilities.config.RecordMode;

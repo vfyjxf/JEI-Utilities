@@ -1,13 +1,17 @@
 package com.github.vfyjxf.jeiutilities.jei.bookmark;
 
-import com.github.vfyjxf.jeiutilities.JEIUtilities;
+import com.github.vfyjxf.jeiutilities.JeiUtilities;
 import com.github.vfyjxf.jeiutilities.config.JeiUtilitiesConfig;
 import com.github.vfyjxf.jeiutilities.helper.IngredientHelper;
 import com.github.vfyjxf.jeiutilities.helper.RecipeHelper;
 import com.github.vfyjxf.jeiutilities.helper.ReflectionUtils;
 import com.github.vfyjxf.jeiutilities.jei.ingredient.CraftingRecipeInfo;
 import com.github.vfyjxf.jeiutilities.jei.ingredient.RecipeInfo;
-import com.google.gson.*;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 import mezz.jei.api.ingredients.IIngredientHelper;
 import mezz.jei.api.ingredients.VanillaTypes;
 import mezz.jei.api.recipe.IFocus;
@@ -36,7 +40,11 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static com.github.vfyjxf.jeiutilities.jei.JeiUtilitiesPlugin.ingredientRegistry;
 
@@ -162,7 +170,7 @@ public class RecipeBookmarkList extends BookmarkList {
         try {
             jsonObject = new JsonParser().parse(recipeInfoString).getAsJsonObject();
         } catch (JsonSyntaxException e) {
-            JEIUtilities.logger.error("Failed to parse recipe info string {}", recipeInfoString, e);
+            JeiUtilities.logger.error("Failed to parse recipe info string {}", recipeInfoString, e);
             return null;
         }
         String ingredientUid = jsonObject.get("ingredient").getAsString();
@@ -173,7 +181,7 @@ public class RecipeBookmarkList extends BookmarkList {
         Object resultObject = loadIngredientFromJson(resultUid, otherIngredientTypes);
 
         if (ingredientObject == null || resultObject == null) {
-            JEIUtilities.logger.error("Failed to load recipe info from json string:\n{}", recipeInfoString);
+            JeiUtilities.logger.error("Failed to load recipe info from json string:\n{}", recipeInfoString);
             return null;
         }
 
@@ -187,7 +195,7 @@ public class RecipeBookmarkList extends BookmarkList {
                 Pair<ICraftingRecipeWrapper, Integer> recipePair = RecipeHelper.getCraftingRecipeWrapperAndIndex(registryName, recipeCategoryUid, resultObject, new Focus<>(mode, ingredientObject));
 
                 if (recipePair == null) {
-                    JEIUtilities.logger.error("Failed to find the corresponding recipe, found the invalid recipe record :\n{}", recipeInfoString);
+                    JeiUtilities.logger.error("Failed to find the corresponding recipe, found the invalid recipe record :\n{}", recipeInfoString);
                     return null;
                 }
 
@@ -210,7 +218,7 @@ public class RecipeBookmarkList extends BookmarkList {
             Pair<IRecipeWrapper, Integer> recipePair = RecipeHelper.getRecipeWrapperAndIndex(recipeUidMap, recipeCategoryUid, resultObject, new Focus<>(mode, ingredientObject));
 
             if (recipePair == null) {
-                JEIUtilities.logger.error("Failed to find the corresponding recipe, found the invalid recipe record :\n{}", recipeInfoString);
+                JeiUtilities.logger.error("Failed to find the corresponding recipe, found the invalid recipe record :\n{}", recipeInfoString);
                 return null;
             }
 
@@ -235,10 +243,10 @@ public class RecipeBookmarkList extends BookmarkList {
                 if (!itemStack.isEmpty()) {
                     return IngredientHelper.getNormalize(itemStack);
                 } else {
-                    JEIUtilities.logger.warn("Failed to load recipe info ItemStack from json string, the item no longer exists:\n{}", itemStackAsJson);
+                    JeiUtilities.logger.warn("Failed to load recipe info ItemStack from json string, the item no longer exists:\n{}", itemStackAsJson);
                 }
             } catch (NBTException e) {
-                JEIUtilities.logger.error("Failed to load bookmarked ItemStack from json string:\n{}", itemStackAsJson, e);
+                JeiUtilities.logger.error("Failed to load bookmarked ItemStack from json string:\n{}", itemStackAsJson, e);
             }
         } else if (ingredientString.startsWith(MARKER_OTHER)) {
             String uid = ingredientString.substring(MARKER_OTHER.length());
@@ -247,7 +255,7 @@ public class RecipeBookmarkList extends BookmarkList {
                 return IngredientHelper.getNormalize(ingredient);
             }
         } else {
-            JEIUtilities.logger.error("Failed to load unknown recipe info:\n{}", ingredientString);
+            JeiUtilities.logger.error("Failed to load unknown recipe info:\n{}", ingredientString);
         }
         return null;
     }

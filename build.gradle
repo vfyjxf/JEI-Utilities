@@ -18,9 +18,6 @@ version = mod_version
 group = mod_group
 archivesBaseName = mod_archives_name + "-" + mc_version
 
-[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
-sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
-
 minecraft {
     mappings channel: 'stable', version: '39-1.12'
     // accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
@@ -103,13 +100,23 @@ dependencies {
     //big recipe test
     runtimeOnly fg.deobf("curse.maven:extended-crafting-268387:2777071")
     runtimeOnly fg.deobf("curse.maven:cucumber-272335:2645867")
-    implementation fg.deobf("curse.maven:modularui-624243:5153413")
 //    deobfCompile("zone.rong:mixinbooter:4.2")
+
+    implementation fg.deobf("curse.maven:modularui-624243:5153413-sources-5153415")
+
+    annotationProcessor 'com.github.bsideup.jabel:jabel-javac-plugin:1.0.0'
+    compileOnly('com.github.bsideup.jabel:jabel-javac-plugin:1.0.0') {
+        transitive = false
+    }
+
+    compileOnly 'org.jetbrains:annotations:24.1.0'
+    annotationProcessor 'org.jetbrains:annotations:24.1.0'
 
     //mixin booter
     annotationProcessor 'org.ow2.asm:asm-debug-all:5.2'
     annotationProcessor 'com.google.guava:guava:32.1.2-jre'
     annotationProcessor 'com.google.code.gson:gson:2.8.9'
+
 
     implementation('zone.rong:mixinbooter:9.1') {
         transitive = false
@@ -126,13 +133,6 @@ mixin {
 jar {
     manifest {
         attributes([
-                "Specification-Title"        : "",
-                "Specification-Vendor"       : "examplemodsareus",
-                "Specification-Version"      : "1", // We are version 1 of ourselves
-                "Implementation-Title"       : project.name,
-                "Implementation-Version"     : project.jar.archiveVersion,
-                "Implementation-Vendor"      : "examplemodsareus",
-                "Implementation-Timestamp"   : new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
                 'FMLCorePlugin'              : 'com.github.vfyjxf.jeiutilities.asm.JeiUtilitiesLoadingPlugin',
                 'ForceLoadAsMod'             : true,
                 'FMLCorePluginContainsFMLMod': 'true'
@@ -143,5 +143,10 @@ jar {
 jar.finalizedBy('reobfJar')
 
 tasks.withType(JavaCompile).configureEach {
-    options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
+    options.encoding = 'UTF-8'
+    sourceCompatibility = 17
+    options.release.set(8)
+    javaCompiler.set(javaToolchains.compilerFor {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    })
 }

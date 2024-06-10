@@ -1,4 +1,4 @@
-package com.github.vfyjxf.jeiutilities.gui.history;
+package com.github.vfyjxf.jeiutilities.ui.history;
 
 import com.github.vfyjxf.jeiutilities.config.JeiUtilitiesConfig;
 import com.github.vfyjxf.jeiutilities.config.SplittingMode;
@@ -32,7 +32,7 @@ import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.awt.*;
+import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
