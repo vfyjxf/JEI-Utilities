@@ -6,11 +6,9 @@ import mezz.jei.Internal;
 import mezz.jei.api.*;
 import mezz.jei.gui.overlay.IngredientGridWithNavigation;
 import mezz.jei.gui.overlay.IngredientListOverlay;
-import mezz.jei.gui.overlay.bookmarks.BookmarkOverlay;
 import mezz.jei.ingredients.IngredientListElementFactory;
 import mezz.jei.ingredients.IngredientOrderTracker;
 import mezz.jei.ingredients.IngredientRegistry;
-import mezz.jei.input.InputHandler;
 import mezz.jei.runtime.JeiRuntime;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
@@ -26,17 +24,11 @@ import static net.minecraftforge.fml.common.ObfuscationReflectionHelper.getPriva
 public class JeiUtilitiesPlugin implements IModPlugin {
 
     public static JeiRuntime jeiRuntime;
-    public static InputHandler inputHandler;
     public static IModRegistry modRegistry;
     public static IngredientRegistry ingredientRegistry;
     public static IngredientOrderTracker ORDER_TRACKER;
     public static IGuiHelper guiHelper;
-    public static BookmarkOverlay bookmarkOverlay;
     public static IngredientListOverlay ingredientListOverlay;
-    /**
-     * This field is set by asm.
-     */
-    public static IRecipeRegistry recipeRegistry;
     private static AdvancedIngredientGrid grid;
 
     @Override
