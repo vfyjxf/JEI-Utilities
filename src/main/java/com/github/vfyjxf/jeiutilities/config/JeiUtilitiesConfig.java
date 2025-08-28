@@ -13,8 +13,6 @@ import java.io.File;
 public class JeiUtilitiesConfig {
 
     private static final String CATEGORY_HISTORY = "history";
-    private static final String CATEGORY_BOOKMARK = "bookmark";
-    private static final String CATEGORY_RENDER = "render";
 
     private static Configuration config;
     private static File modConfigFile;
@@ -24,13 +22,6 @@ public class JeiUtilitiesConfig {
     private static boolean matchesNBTs = true;
     private static SplittingMode splittingMode = SplittingMode.DOTTED_LINE;
     private static int backgroundColour = 0xee555555;
-
-    private static boolean recordRecipes = true;
-    private static boolean showRecipeBookmarkReminders = true;
-    private static RecordMode recordMode = RecordMode.ENABLE;
-
-    private static boolean adaptiveRecipePreview = true;
-    private static float recipePreviewScaling = 0.8F;
 
 
     public static void preInit(FMLPreInitializationEvent event) {
@@ -94,44 +85,6 @@ public class JeiUtilitiesConfig {
                     "Color of the history area display"
             );
         }
-        {
-            recordRecipes = config.getBoolean("recordRecipes",
-                    CATEGORY_BOOKMARK,
-                    recordRecipes,
-                    "Record current recipe when add ingredient to bookmark in recipe screen"
-            );
-
-            showRecipeBookmarkReminders = config.getBoolean("showRecipeBookmarkReminders",
-                    CATEGORY_BOOKMARK,
-                    showRecipeBookmarkReminders,
-                    "Display a letter \"R\" in the upper left corner of the recipe bookmark."
-            );
-
-            recordMode = RecordMode.valueOf(config.getString(
-                    "recordMode", CATEGORY_BOOKMARK, recordMode.name(),
-                    "Current mode of recording recipes." + "\n"
-                            + "Enable: The opposite of RESTRICTED mode" + "\n"
-                            + "Disable: Don't record any recipes" + "\n"
-                            + "RESTRICTED: You need to hold down Shift to view the recorded recipe or record recipe.")
-            );
-
-        }
-        {
-            adaptiveRecipePreview = config.getBoolean("adaptiveRecipePreview",
-                    CATEGORY_RENDER,
-                    adaptiveRecipePreview,
-                    "If true, then the recipe preview will automatically select the appropriate scaling based on the screen size."
-            );
-
-            recipePreviewScaling = config.getFloat("recipePreviewScaling",
-                    CATEGORY_RENDER,
-                    recipePreviewScaling,
-                    0.01F,
-                    5.0F,
-                    "The scaling of the recipe preview.It is only used when adaptiveRecipePreview is false."
-            );
-
-        }
 
         if (config.hasChanged()) {
             config.save();
@@ -140,10 +93,6 @@ public class JeiUtilitiesConfig {
 
     public static Configuration getConfig() {
         return config;
-    }
-
-    public static File getModConfigFile() {
-        return modConfigFile;
     }
 
     public static boolean isEnableHistory() {
@@ -158,38 +107,12 @@ public class JeiUtilitiesConfig {
         return matchesNBTs;
     }
 
-    public static boolean getRecordRecipes() {
-        return recordRecipes;
-    }
-
-    public static RecordMode getRecordMode() {
-        return recordMode;
-    }
-
     public static int getBackgroundColour() {
         return backgroundColour;
     }
 
-    public static void setRecordMode(RecordMode mode) {
-        JeiUtilitiesConfig.recordMode = mode;
-        config.get(CATEGORY_BOOKMARK, "recordMode", recordMode.name(), "Current mode of recording recipes").set(mode.name());
-        config.save();
-    }
-
-    public static boolean isShowRecipeBookmarkReminders() {
-        return showRecipeBookmarkReminders;
-    }
-
     public static SplittingMode getSplittingMode() {
         return splittingMode;
-    }
-
-    public static boolean isAdaptiveRecipePreview() {
-        return adaptiveRecipePreview;
-    }
-
-    public static float getRecipePreviewScaling() {
-        return recipePreviewScaling;
     }
 
     @SubscribeEvent

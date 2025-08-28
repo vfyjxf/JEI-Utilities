@@ -3,7 +3,6 @@ package com.github.vfyjxf.jeiutilities.gui.history;
 import com.github.vfyjxf.jeiutilities.config.JeiUtilitiesConfig;
 import com.github.vfyjxf.jeiutilities.config.SplittingMode;
 import com.github.vfyjxf.jeiutilities.helper.IngredientHelper;
-import com.github.vfyjxf.jeiutilities.jei.ingredient.RecipeInfo;
 import mezz.jei.Internal;
 import mezz.jei.api.ingredients.IIngredientHelper;
 import mezz.jei.config.Config;
@@ -92,28 +91,32 @@ public class AdvancedIngredientGrid extends IngredientGrid {
         }
 
         for (int row = 0; row < rows; row++) {
+            List<IngredientListSlot> ingredientRow = new ArrayList<>();
             int y1 = y + (row * INGREDIENT_HEIGHT);
             for (int column = 0; column < columns; column++) {
                 int x1 = xOffset + (column * INGREDIENT_WIDTH);
-                IngredientListSlot ingredientListSlot = new IngredientListSlot(x1, y1, 1);
+                IngredientListSlot ingredientListSlot = new IngredientListSlot(x1, y1, INGREDIENT_PADDING);
                 Rectangle stackArea = ingredientListSlot.getArea();
                 final boolean blocked = MathUtil.intersects(exclusionAreas, stackArea);
                 ingredientListSlot.setBlocked(blocked);
-                this.guiIngredientSlots.add(ingredientListSlot);
+                ingredientRow.add(ingredientListSlot);
             }
+            this.guiIngredientSlots.add(ingredientRow);
         }
 
         if (showHistory) {
             for (int row = 0; row < useRows; row++) {
+                List<IngredientListSlot> ingredientRow = new ArrayList<>();
                 int y1 = y + ((row + rows) * INGREDIENT_HEIGHT);
                 for (int column = 0; column < columns; column++) {
                     int x1 = xOffset + (column * INGREDIENT_WIDTH);
-                    IngredientListSlot ingredientListSlot = new IngredientListSlot(x1, y1, 1);
+                    IngredientListSlot ingredientListSlot = new IngredientListSlot(x1, y1, INGREDIENT_PADDING);
                     Rectangle stackArea = ingredientListSlot.getArea();
                     final boolean blocked = MathUtil.intersects(exclusionAreas, stackArea);
                     ingredientListSlot.setBlocked(blocked);
-                    this.guiHistoryIngredientSlots.add(ingredientListSlot);
+                    ingredientRow.add(ingredientListSlot);
                 }
+                this.guiHistoryIngredientSlots.add(ingredientRow);
             }
             guiHistoryIngredientSlots.set(0, this.historyIngredientElements);
         }
@@ -236,10 +239,6 @@ public class AdvancedIngredientGrid extends IngredientGrid {
 
     public void addHistoryIngredient(Object value) {
         if (value != null) {
-
-            if (value instanceof RecipeInfo) {
-                return;
-            }
 
             Object normalized = IngredientHelper.getNormalize(value);
             IIngredientListElement<?> ingredient = IngredientListElement.create(

@@ -13,6 +13,10 @@ buildscript {
             name = "sponge"
             url = "https://repo.spongepowered.org/maven"
         }
+        maven {
+            name 'Cleanroom Maven'
+            url 'https://maven.cleanroommc.com'
+        }
     }
     dependencies {
         classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
@@ -91,19 +95,20 @@ repositories {
 }
 
 dependencies {
-    deobfCompile "mezz.jei:jei_${mc_version}:${jei_version}"
+    implementation "mezz:jei:${jei_version}"
+    runtime "mezz:jei:${jei_version}"
     //big recipe test
     runtime "curse.maven:extended-crafting-268387:2777071"
     runtime "curse.maven:cucumber-272335:2645867"
 //    deobfCompile("zone.rong:mixinbooter:4.2")
 }
 
-task devJar(type: Jar) {
+tasks.register('devJar', Jar) {
     classifier = 'dev'
     from sourceSets.main.output
 }
 
-task sourcesJar(type: Jar) {
+tasks.register('sourcesJar', Jar) {
     classifier = 'sources'
     from sourceSets.main.allSource
 }
