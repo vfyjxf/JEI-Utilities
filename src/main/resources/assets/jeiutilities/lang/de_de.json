@@ -1,0 +1,14 @@
+jeiutilities.tooltip.recording=Konfiguration des Rezeptsatzes
+jeiutilities.tooltip.recording.mode=Aktueller Modus : %s
+jeiutilities.tooltip.recording.description.restricted=Öffnen Sie ein gespeichertes Rezept oder markieren Sie ein Rezept, während Sie die Umschalttaste gedrückt halten.
+jeiutilities.tooltip.recording.description.enable=Rezepte werden nicht gespeichert oder geöffnet, wenn die Umschalttaste gedrückt wird.
+jeiutilities.tooltip.recording.information_1=Halten Sie die Taste %s gedrückt, um die Rezeptvorschau anzuzeigen.
+
+jeiutilities.button.name.disable=Deaktivieren
+jeiutilities.button.name.enable=Aktivieren
+jeiutilities.button.name.restricted=Eingeschränkt
+
+key.jeiutilities.displayRecipe=Rezeptvorschau anzeigen
+key.jeiutilities.pickBookmark=Lesezeichen auswählen
+key.jeiutilities.transferRecipe=Rezept übertragen (einzeln)
+key.jeiutilities.transferRecipeMax=Rezept übertragen (MAX)
