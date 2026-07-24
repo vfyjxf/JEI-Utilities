@@ -13,6 +13,7 @@ import mezz.jei.gui.overlay.IngredientGrid;
 import mezz.jei.ingredients.IngredientListElement;
 import mezz.jei.input.ClickedIngredient;
 import mezz.jei.input.IClickedIngredient;
+import mezz.jei.input.MouseHelper;
 import mezz.jei.render.IngredientListBatchRenderer;
 import mezz.jei.render.IngredientListSlot;
 import mezz.jei.render.IngredientRenderer;
@@ -190,6 +191,26 @@ public class AdvancedIngredientGrid extends IngredientGrid {
                 }
             }
         }
+    }
+
+    @Nullable
+    @Override
+    public IIngredientListElement<?> getElementUnderMouse() {
+        IIngredientListElement<?> under = super.getElementUnderMouse();
+
+        // if super impl returned a result, use it
+        if(under != null)
+            return under;
+
+        // if history pane is visible, get the element under the mouse from its renderer
+        if(showHistory) {
+            IngredientRenderer<?> renderer = guiHistoryIngredientSlots.getHovered(MouseHelper.getX(), MouseHelper.getY());
+            if(renderer != null)
+                return renderer.getElement();
+        }
+
+        // all other situations, no element
+        return null;
     }
 
     @Nullable
