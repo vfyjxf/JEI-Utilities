@@ -33,6 +33,10 @@ import org.lwjgl.opengl.GL11;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.awt.*;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -48,8 +52,37 @@ public class AdvancedIngredientGrid extends IngredientGrid {
     public static final int USE_ROWS = 2;
     public static final int MIN_ROWS = 6;
 
+    private static final MethodHandle SLOTS_ADDER;
+    private static final boolean ADD_LIST;
+
+    static {
+        MethodHandles.Lookup lookup = MethodHandles.lookup();
+        MethodHandle handle;
+        boolean addList;
+        try {
+            Method addMethod = IngredientListBatchRenderer.class.getMethod("add", List.class);
+            handle = lookup.unreflect(addMethod)
+                    .asType(MethodType.methodType(void.class, IngredientListBatchRenderer.class, List.class));
+            addList = true;
+        } catch (NoSuchMethodException e) {
+            try {
+                Method addMethod = IngredientListBatchRenderer.class.getMethod("add", IngredientListSlot.class);
+                handle = lookup.unreflect(addMethod)
+                        .asType(MethodType.methodType(void.class, IngredientListBatchRenderer.class, IngredientListSlot.class));
+                addList = false;
+            } catch (NoSuchMethodException | IllegalAccessException e2) {
+                throw new RuntimeException("No compatible add method in IngredientListBatchRenderer", e2);
+            }
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+        SLOTS_ADDER = handle;
+        ADD_LIST = addList;
+    }
+
     private int historySize;
     private int columns;
+    private int visibleSize;
     private final IngredientListBatchRenderer guiHistoryIngredientSlots;
     @SuppressWarnings("rawtypes")
     private final List<IIngredientListElement> historyIngredientElements = new ArrayList<>();
@@ -59,6 +92,25 @@ public class AdvancedIngredientGrid extends IngredientGrid {
     public AdvancedIngredientGrid() {
         super(GridAlignment.LEFT);
         this.guiHistoryIngredientSlots = new IngredientListBatchRenderer();
+    }
+
+    @Override
+    public int size() {
+        return visibleSize;
+    }
+
+    private static void addSlots(IngredientListBatchRenderer renderer, List<IngredientListSlot> row) {
+        try {
+            if (ADD_LIST) {
+                SLOTS_ADDER.invokeExact(renderer, (List) row);
+            } else {
+                for (IngredientListSlot slot : row) {
+                    SLOTS_ADDER.invokeExact(renderer, slot);
+                }
+            }
+        } catch (Throwable t) {
+            throw new RuntimeException(t);
+        }
     }
 
     @Override
@@ -79,6 +131,7 @@ public class AdvancedIngredientGrid extends IngredientGrid {
         this.guiIngredientSlots.clear();
         this.guiHistoryIngredientSlots.clear();
         this.historySize = columns * useRows;
+        this.visibleSize = 0;
 
         if (rows == 0 || columns < Config.smallestNumColumns) {
             return false;
@@ -100,9 +153,12 @@ public class AdvancedIngredientGrid extends IngredientGrid {
                 Rectangle stackArea = ingredientListSlot.getArea();
                 final boolean blocked = MathUtil.intersects(exclusionAreas, stackArea);
                 ingredientListSlot.setBlocked(blocked);
+                if (!blocked) {
+                    this.visibleSize++;
+                }
                 ingredientRow.add(ingredientListSlot);
             }
-            this.guiIngredientSlots.add(ingredientRow);
+            addSlots(this.guiIngredientSlots, ingredientRow);
         }
 
         if (showHistory) {
@@ -117,7 +173,7 @@ public class AdvancedIngredientGrid extends IngredientGrid {
                     ingredientListSlot.setBlocked(blocked);
                     ingredientRow.add(ingredientListSlot);
                 }
-                this.guiHistoryIngredientSlots.add(ingredientRow);
+                addSlots(this.guiHistoryIngredientSlots, ingredientRow);
             }
             guiHistoryIngredientSlots.set(0, this.historyIngredientElements);
         }
