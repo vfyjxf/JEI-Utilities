@@ -4,10 +4,10 @@
   "description": "${mod_description}",
   "version": "${mod_version}",
   "mcversion": "${mc_version}",
-  "url": "",
+  "url": "https://github.com/vfyjxf/JEI-Utilities",
   "updateUrl": "",
   "authorList": ["${mod_author}"],
-  "credits": "",
+  "credits": "${mod_credits}",
   "logoFile": "${mod_icon}",
   "screenshots": [],
   "dependencies": []
